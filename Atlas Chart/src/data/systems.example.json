@@ -1,0 +1,421 @@
+{
+  "systems": [
+    {
+      "id": "hub",
+      "name": "Customer Hub",
+      "type": "app",
+      "domain": "Customer Experience",
+      "team": "Frontend Team",
+      "owner": "Sarah Chen",
+      "status": "live",
+      "description": "Central customer portal and dashboard",
+      "features": ["User authentication", "Dashboard views", "Profile management", "Settings"],
+      "tags": ["frontend", "portal", "customer-facing"],
+      "links": [
+        {
+          "label": "Production Dashboard",
+          "url": "https://hub.company.com",
+          "kind": "dashboard"
+        },
+        {
+          "label": "Documentation",
+          "url": "https://docs.company.com/hub",
+          "kind": "docs"
+        }
+      ]
+    },
+    {
+      "id": "auth-service",
+      "name": "Auth Service",
+      "type": "service",
+      "domain": "Security & Identity",
+      "team": "Platform Team",
+      "owner": "Mike Rodriguez",
+      "status": "live",
+      "description": "Centralized authentication and authorization service",
+      "features": ["OAuth 2.0", "JWT tokens", "RBAC", "SSO integration"],
+      "tags": ["backend", "security", "identity"],
+      "dependencies": [
+        {
+          "targetId": "user-db",
+          "kind": "sync",
+          "note": "User data lookup"
+        }
+      ],
+      "links": [
+        {
+          "label": "API Docs",
+          "url": "https://api.company.com/auth/docs",
+          "kind": "docs"
+        }
+      ]
+    },
+    {
+      "id": "user-db",
+      "name": "User Database",
+      "type": "datastore",
+      "domain": "Data & Storage",
+      "team": "Data Team",
+      "owner": "Alex Kim",
+      "status": "live",
+      "description": "Primary user data storage with high availability",
+      "features": ["PostgreSQL", "Read replicas", "Backup & recovery", "Encryption at rest"],
+      "tags": ["database", "postgresql", "primary"],
+      "links": [
+        {
+          "label": "Monitoring",
+          "url": "https://monitoring.company.com/db/user-db",
+          "kind": "dashboard"
+        }
+      ]
+    },
+    {
+      "id": "notification-service",
+      "name": "Notification Service",
+      "type": "service",
+      "domain": "Customer Experience",
+      "team": "Backend Team",
+      "owner": "Emma Wilson",
+      "status": "building",
+      "description": "Multi-channel notification delivery system",
+      "features": ["Email notifications", "Push notifications", "SMS alerts", "Template engine"],
+      "tags": ["backend", "notifications", "messaging"],
+      "dependencies": [
+        {
+          "targetId": "email-queue",
+          "kind": "async",
+          "note": "Email delivery"
+        },
+        {
+          "targetId": "push-queue",
+          "kind": "async",
+          "note": "Push notifications"
+        }
+      ],
+      "planned": {
+        "start": "2024-01-15",
+        "end": "2024-03-15"
+      },
+      "actual": {
+        "start": "2024-01-15"
+      }
+    },
+    {
+      "id": "email-queue",
+      "name": "Email Queue",
+      "type": "queue",
+      "domain": "Infrastructure",
+      "team": "Platform Team",
+      "owner": "David Park",
+      "status": "live",
+      "description": "High-throughput email message queue",
+      "features": ["RabbitMQ", "Dead letter handling", "Rate limiting", "Retry logic"],
+      "tags": ["queue", "rabbitmq", "infrastructure"],
+      "links": [
+        {
+          "label": "Queue Monitoring",
+          "url": "https://monitoring.company.com/queues/email",
+          "kind": "dashboard"
+        }
+      ]
+    },
+    {
+      "id": "push-queue",
+      "name": "Push Queue",
+      "type": "queue",
+      "domain": "Infrastructure",
+      "team": "Platform Team",
+      "owner": "David Park",
+      "status": "planned",
+      "description": "Push notification message queue",
+      "features": ["Redis Streams", "Batch processing", "Priority queues", "Delivery tracking"],
+      "tags": ["queue", "redis", "infrastructure"],
+      "planned": {
+        "start": "2024-02-01",
+        "end": "2024-02-28"
+      }
+    },
+    {
+      "id": "analytics-service",
+      "name": "Analytics Service",
+      "type": "service",
+      "domain": "Data & Analytics",
+      "team": "Data Team",
+      "owner": "Lisa Zhang",
+      "status": "live",
+      "description": "Real-time analytics and reporting service",
+      "features": ["Event tracking", "Real-time dashboards", "Custom reports", "Data export"],
+      "tags": ["analytics", "backend", "reporting"],
+      "dependencies": [
+        {
+          "targetId": "events-db",
+          "kind": "async",
+          "note": "Event data ingestion"
+        }
+      ],
+      "links": [
+        {
+          "label": "Analytics Dashboard",
+          "url": "https://analytics.company.com",
+          "kind": "dashboard"
+        }
+      ]
+    },
+    {
+      "id": "events-db",
+      "name": "Events Database",
+      "type": "datastore",
+      "domain": "Data & Storage",
+      "team": "Data Team",
+      "owner": "Alex Kim",
+      "status": "live",
+      "description": "Time-series database for event data",
+      "features": ["ClickHouse", "Time-series optimized", "Compression", "Fast aggregations"],
+      "tags": ["database", "clickhouse", "timeseries"],
+      "links": [
+        {
+          "label": "Database Monitoring",
+          "url": "https://monitoring.company.com/db/events-db",
+          "kind": "dashboard"
+        }
+      ]
+    },
+    {
+      "id": "payment-service",
+      "name": "Payment Service",
+      "type": "service",
+      "domain": "Financial Services",
+      "team": "Payments Team",
+      "owner": "James Thompson",
+      "status": "risk",
+      "description": "Payment processing and billing service",
+      "features": ["Credit card processing", "Invoice generation", "Subscription management", "Fraud detection"],
+      "tags": ["payments", "backend", "financial"],
+      "dependencies": [
+        {
+          "targetId": "payment-gateway",
+          "kind": "sync",
+          "note": "Payment processing"
+        },
+        {
+          "targetId": "billing-db",
+          "kind": "sync",
+          "note": "Transaction records"
+        }
+      ],
+      "planned": {
+        "start": "2023-10-01",
+        "end": "2023-12-15"
+      },
+      "actual": {
+        "start": "2023-10-01"
+      },
+      "links": [
+        {
+          "label": "Payment Dashboard",
+          "url": "https://payments.company.com",
+          "kind": "dashboard"
+        }
+      ]
+    },
+    {
+      "id": "payment-gateway",
+      "name": "Payment Gateway",
+      "type": "external",
+      "domain": "Financial Services",
+      "team": "Payments Team",
+      "owner": "James Thompson",
+      "status": "live",
+      "description": "Third-party payment processor integration",
+      "features": ["Stripe integration", "PCI compliance", "Multiple currencies", "Webhook handling"],
+      "tags": ["external", "stripe", "payments"],
+      "links": [
+        {
+          "label": "Stripe Dashboard",
+          "url": "https://dashboard.stripe.com",
+          "kind": "dashboard"
+        }
+      ]
+    },
+    {
+      "id": "billing-db",
+      "name": "Billing Database",
+      "type": "datastore",
+      "domain": "Data & Storage",
+      "team": "Data Team",
+      "owner": "Alex Kim",
+      "status": "live",
+      "description": "Financial transaction and billing data storage",
+      "features": ["PostgreSQL", "ACID compliance", "Audit trails", "Encryption"],
+      "tags": ["database", "postgresql", "financial"],
+      "links": [
+        {
+          "label": "Database Monitoring",
+          "url": "https://monitoring.company.com/db/billing-db",
+          "kind": "dashboard"
+        }
+      ]
+    },
+    {
+      "id": "recommendation-engine",
+      "name": "Recommendation Engine",
+      "type": "service",
+      "domain": "AI & Machine Learning",
+      "team": "ML Team",
+      "owner": "Rachel Green",
+      "status": "planned",
+      "description": "ML-powered product recommendations",
+      "features": ["Collaborative filtering", "Content-based filtering", "A/B testing", "Real-time inference"],
+      "tags": ["ml", "recommendations", "backend"],
+      "dependencies": [
+        {
+          "targetId": "ml-models-db",
+          "kind": "sync",
+          "note": "Model data access"
+        },
+        {
+          "targetId": "user-behavior-queue",
+          "kind": "async",
+          "note": "Behavioral data"
+        }
+      ],
+      "planned": {
+        "start": "2024-03-01",
+        "end": "2024-06-30"
+      }
+    },
+    {
+      "id": "ml-models-db",
+      "name": "ML Models Database",
+      "type": "datastore",
+      "domain": "Data & Storage",
+      "team": "Data Team",
+      "owner": "Alex Kim",
+      "status": "planned",
+      "description": "Storage for machine learning models and metadata",
+      "features": ["Model versioning", "Feature stores", "Model registry", "Performance tracking"],
+      "tags": ["database", "ml", "models"],
+      "planned": {
+        "start": "2024-02-15",
+        "end": "2024-03-15"
+      }
+    },
+    {
+      "id": "user-behavior-queue",
+      "name": "User Behavior Queue",
+      "type": "queue",
+      "domain": "Infrastructure",
+      "team": "Platform Team",
+      "owner": "David Park",
+      "status": "planned",
+      "description": "Queue for user interaction events",
+      "features": ["Kafka", "High throughput", "Event streaming", "Schema registry"],
+      "tags": ["queue", "kafka", "events"],
+      "planned": {
+        "start": "2024-02-01",
+        "end": "2024-02-28"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "hub-auth",
+      "source": "hub",
+      "target": "auth-service",
+      "kind": "sync",
+      "note": "User authentication"
+    },
+    {
+      "id": "auth-user-db",
+      "source": "auth-service",
+      "target": "user-db",
+      "kind": "sync",
+      "note": "User data lookup"
+    },
+    {
+      "id": "hub-notification",
+      "source": "hub",
+      "target": "notification-service",
+      "kind": "async",
+      "note": "User notifications"
+    },
+    {
+      "id": "notification-email",
+      "source": "notification-service",
+      "target": "email-queue",
+      "kind": "async",
+      "note": "Email delivery"
+    },
+    {
+      "id": "notification-push",
+      "source": "notification-service",
+      "target": "push-queue",
+      "kind": "async",
+      "note": "Push notifications"
+    },
+    {
+      "id": "hub-analytics",
+      "source": "hub",
+      "target": "analytics-service",
+      "kind": "event",
+      "note": "User interaction events"
+    },
+    {
+      "id": "analytics-events",
+      "source": "analytics-service",
+      "target": "events-db",
+      "kind": "async",
+      "note": "Event data ingestion"
+    },
+    {
+      "id": "hub-payment",
+      "source": "hub",
+      "target": "payment-service",
+      "kind": "sync",
+      "note": "Payment processing"
+    },
+    {
+      "id": "payment-gateway-edge",
+      "source": "payment-service",
+      "target": "payment-gateway",
+      "kind": "sync",
+      "note": "Payment processing"
+    },
+    {
+      "id": "payment-billing",
+      "source": "payment-service",
+      "target": "billing-db",
+      "kind": "sync",
+      "note": "Transaction records"
+    },
+    {
+      "id": "hub-recommendation",
+      "source": "hub",
+      "target": "recommendation-engine",
+      "kind": "sync",
+      "note": "Product recommendations"
+    },
+    {
+      "id": "recommendation-ml",
+      "source": "recommendation-engine",
+      "target": "ml-models-db",
+      "kind": "sync",
+      "note": "Model data access"
+    },
+    {
+      "id": "recommendation-behavior",
+      "source": "recommendation-engine",
+      "target": "user-behavior-queue",
+      "kind": "async",
+      "note": "Behavioral data"
+    },
+    {
+      "id": "hub-behavior",
+      "source": "hub",
+      "target": "user-behavior-queue",
+      "kind": "event",
+      "note": "User interaction tracking"
+    }
+  ]
+}
+
