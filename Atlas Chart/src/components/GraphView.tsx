@@ -156,53 +156,61 @@ const SystemNodeComponent = memo(({ data, selected }: NodeProps<SystemNode>) => 
 
       {/* Connection Handles */}
       <Handle
+        id="source-top"
         type="source"
         position={Position.Top}
-        className="w-3 h-3 bg-primary border-2 border-white opacity-100 transition-opacity"
-        style={{ top: -6 }}
+        className="w-4 h-4 bg-blue-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
+        style={{ top: -8 }}
       />
       <Handle
+        id="source-right"
         type="source"
         position={Position.Right}
-        className="w-3 h-3 bg-primary border-2 border-white opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ right: -6 }}
+        className="w-4 h-4 bg-blue-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
+        style={{ right: -8 }}
       />
       <Handle
+        id="source-bottom"
         type="source"
         position={Position.Bottom}
-        className="w-3 h-3 bg-primary border-2 border-white opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ bottom: -6 }}
+        className="w-4 h-4 bg-blue-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
+        style={{ bottom: -8 }}
       />
       <Handle
+        id="source-left"
         type="source"
         position={Position.Left}
-        className="w-3 h-3 bg-primary border-2 border-white opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ left: -6 }}
+        className="w-4 h-4 bg-blue-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
+        style={{ left: -8 }}
       />
 
       <Handle
+        id="target-top"
         type="target"
         position={Position.Top}
-        className="w-3 h-3 bg-primary border-2 border-white opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ top: -6 }}
+        className="w-4 h-4 bg-green-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
+        style={{ top: -8 }}
       />
       <Handle
+        id="target-right"
         type="target"
         position={Position.Right}
-        className="w-3 h-3 bg-primary border-2 border-white opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ right: -6 }}
+        className="w-4 h-4 bg-green-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
+        style={{ right: -8 }}
       />
       <Handle
+        id="target-bottom"
         type="target"
         position={Position.Bottom}
-        className="w-3 h-3 bg-primary border-2 border-white opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ bottom: -6 }}
+        className="w-4 h-4 bg-green-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
+        style={{ bottom: -8 }}
       />
       <Handle
+        id="target-left"
         type="target"
         position={Position.Left}
-        className="w-3 h-3 bg-primary border-2 border-white opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ left: -6 }}
+        className="w-4 h-4 bg-green-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
+        style={{ left: -8 }}
       />
     </div>
   );

@@ -167,8 +167,10 @@ export default function Editor() {
     console.log('Connection created:', newEdge);
   };
 
-  // Debug logging for connection state
-  console.log('Editor render:', { selectedTool, selectedConnectionType, nodesConnectable: selectedTool === 'connect' });
+  const isValidConnection = (connection: any) => {
+    // Allow all connections - this enables drag-to-connect functionality
+    return true;
+  };
 
   return (
     <div className="w-full h-full relative">
@@ -182,6 +184,7 @@ export default function Editor() {
           onNodeDrag={onNodeDrag}
           onPaneClick={onPaneClick}
           onConnect={onConnect}
+          isValidConnection={isValidConnection}
           fitView
           fitViewOptions={{ padding: 0.1 }}
           minZoom={0.1}
@@ -193,6 +196,9 @@ export default function Editor() {
           nodesDraggable={true}
           nodesConnectable={selectedTool === 'connect'}
           elementsSelectable={true}
+          connectionMode="loose"
+          connectionLineStyle={{ stroke: '#0078ff', strokeWidth: 2 }}
+          connectionLineType="step"
         >
           <Background 
             color="var(--line)" 

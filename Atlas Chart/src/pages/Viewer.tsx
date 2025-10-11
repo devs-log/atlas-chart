@@ -7,12 +7,22 @@ import { applySimpleSceneLayout } from '@/lib/simpleLayouts';
 
 import GraphView from '@/components/GraphView';
 import EdgeShape from '@/components/EdgeShape';
+import StraightEdge from '@/components/StraightEdge';
+import StepEdge from '@/components/StepEdge';
 import SceneToolbar from '@/components/SceneToolbar';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import DetailCard from '@/components/DetailCard';
 import FullscreenButton from '@/components/FullscreenButton';
 import CommandPalette from '@/components/CommandPalette';
 import MenuBar from '@/components/MenuBar';
+
+// Define node and edge types outside component to prevent recreation
+const nodeTypes = { system: GraphView };
+const edgeTypes = {
+  systemEdge: EdgeShape,
+  straightEdge: StraightEdge,
+  stepEdge: StepEdge,
+};
 
 export default function Viewer() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -26,9 +36,11 @@ export default function Viewer() {
     selectedNodeId,
     showDetailCard,
     showCommandPalette,
+    selectedConnectionType,
     setSystems,
     setFocusNodeId,
     setSelectedNodeId,
+    addEdge,
     syncToURL,
     getReactFlowNodes,
     getReactFlowEdges,
@@ -113,6 +125,19 @@ export default function Viewer() {
     ));
   };
 
+  const onConnect = (params: any) => {
+    console.log('onConnect triggered in Viewer!', { params, selectedConnectionType });
+    const newEdge = {
+      id: `edge-${Date.now()}`,
+      source: params.source,
+      target: params.target,
+      kind: 'other' as const,
+      connectionType: selectedConnectionType,
+    };
+    addEdge(newEdge);
+    console.log('Connection created:', newEdge);
+  };
+
 
   return (
     <div className="w-full h-full relative">
@@ -124,16 +149,17 @@ export default function Viewer() {
           onNodeClick={onNodeClick}
           onNodeDrag={onNodeDrag}
           onPaneClick={onPaneClick}
+          onConnect={onConnect}
           fitView
           fitViewOptions={{ padding: 0.1 }}
           minZoom={0.1}
           maxZoom={3}
           defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-          nodeTypes={{ system: GraphView }}
-          edgeTypes={{ systemEdge: EdgeShape }}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           className="canvas-grid"
           nodesDraggable={true}
-          nodesConnectable={false}
+          nodesConnectable={true}
           elementsSelectable={true}
         >
           <Background 
