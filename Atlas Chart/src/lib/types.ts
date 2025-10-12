@@ -53,6 +53,8 @@ export interface SystemEdge {
   id: string;
   source: string;
   target: string;
+  sourceHandle?: string;   // NEW
+  targetHandle?: string;   // NEW
   kind: EdgeKind;
   note?: string;
   animated?: boolean;
@@ -93,6 +95,9 @@ export interface AtlasState {
   
   // Settings
   colorScheme: ColorScheme;
+  
+  // Connection state
+  isConnecting: boolean;
 }
 
 export interface SceneLayout {

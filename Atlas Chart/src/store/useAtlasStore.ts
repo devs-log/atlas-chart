@@ -64,6 +64,9 @@ interface AtlasStore extends AtlasState {
   getOutboundEdges: (nodeId: string) => SystemEdge[];
   getBreadcrumbs: () => Breadcrumb[];
   
+  // Connection actions
+  setConnecting: (connecting: boolean) => void;
+  
   // React Flow helpers
   getReactFlowNodes: () => any[];
   getReactFlowEdges: () => any[];
@@ -96,6 +99,7 @@ const defaultState: AtlasState = {
   searchQuery: '',
   searchResults: [],
   colorScheme: 'default',
+  isConnecting: false,
 };
 
 export const useAtlasStore = create<AtlasStore>()(
@@ -363,6 +367,8 @@ export const useAtlasStore = create<AtlasStore>()(
             type: edgeType,
             source: edge.source,
             target: edge.target,
+            sourceHandle: edge.sourceHandle,   // ✅ new
+            targetHandle: edge.targetHandle,   // ✅ new
             data: edge,
             animated: edge.animated,
           };
@@ -417,6 +423,11 @@ export const useAtlasStore = create<AtlasStore>()(
         state.colorScheme = scheme;
         // Apply the color scheme to the document
         document.documentElement.setAttribute('data-color-scheme', scheme);
+      }),
+
+      // Connection actions
+      setConnecting: (connecting) => set((state) => {
+        state.isConnecting = connecting;
       }),
     }))
   )

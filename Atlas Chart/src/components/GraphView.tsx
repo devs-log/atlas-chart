@@ -1,5 +1,6 @@
-import { memo } from 'react';
+import React, { memo } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
+import { useAtlasStore } from '@/store/useAtlasStore';
 import { 
   Database, 
   Server, 
@@ -44,6 +45,20 @@ const statusConfig = {
 };
 
 const SystemNodeComponent = memo(({ data, selected }: NodeProps<SystemNode>) => {
+  // Get connection state from the store
+  const selectedTool = useAtlasStore((state) => state.selectedTool);
+  const isConnecting = useAtlasStore((state) => state.isConnecting);
+  
+  // Determine handle types based on connection mode and state
+  const isConnectMode = selectedTool === 'connect';
+  
+  // Always allow both source and target connections, but change visual appearance
+  // When in connect mode and not connecting: all handles appear as source (blue)
+  // When in connect mode and connecting: all handles appear as target (green) 
+  // When not in connect mode: all handles appear as target (green)
+  const handleType = 'source'; // Always source, but we'll control visibility with color
+  const handleColor = isConnectMode && !isConnecting ? '#3b82f6' : '#10b981';
+
   const TypeIcon = typeIcons[data.type] || Building;
   const StatusIcon = statusConfig[data.status].icon;
   const statusColor = statusConfig[data.status].color;
@@ -154,63 +169,81 @@ const SystemNodeComponent = memo(({ data, selected }: NodeProps<SystemNode>) => 
         )}
       </div>
 
-      {/* Connection Handles */}
+      {/* Connection Handles - Use simple IDs that React Flow expects */}
+      {/* Source handles (for initiating connections) */}
       <Handle
-        id="source-top"
+        id="top"
         type="source"
         position={Position.Top}
-        className="w-4 h-4 bg-blue-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
-        style={{ top: -8 }}
+        className={`w-4 h-4 border-2 border-white transition-all cursor-crosshair z-10 ${
+          isConnectMode && !isConnecting ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ top: -8, backgroundColor: '#3b82f6' }}
       />
       <Handle
-        id="source-right"
+        id="right"
         type="source"
         position={Position.Right}
-        className="w-4 h-4 bg-blue-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
-        style={{ right: -8 }}
+        className={`w-4 h-4 border-2 border-white transition-all cursor-crosshair z-10 ${
+          isConnectMode && !isConnecting ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ right: -8, backgroundColor: '#3b82f6' }}
       />
       <Handle
-        id="source-bottom"
+        id="bottom"
         type="source"
         position={Position.Bottom}
-        className="w-4 h-4 bg-blue-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
-        style={{ bottom: -8 }}
+        className={`w-4 h-4 border-2 border-white transition-all cursor-crosshair z-10 ${
+          isConnectMode && !isConnecting ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ bottom: -8, backgroundColor: '#3b82f6' }}
       />
       <Handle
-        id="source-left"
+        id="left"
         type="source"
         position={Position.Left}
-        className="w-4 h-4 bg-blue-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
-        style={{ left: -8 }}
+        className={`w-4 h-4 border-2 border-white transition-all cursor-crosshair z-10 ${
+          isConnectMode && !isConnecting ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ left: -8, backgroundColor: '#3b82f6' }}
       />
 
+      {/* Target handles (for receiving connections) */}
       <Handle
-        id="target-top"
+        id="top"
         type="target"
         position={Position.Top}
-        className="w-4 h-4 bg-green-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
-        style={{ top: -8 }}
+        className={`w-4 h-4 border-2 border-white transition-all cursor-crosshair z-10 ${
+          !isConnectMode || isConnecting ? 'opacity-70 hover:opacity-100 group-hover:opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ top: -8, backgroundColor: '#10b981' }}
       />
       <Handle
-        id="target-right"
+        id="right"
         type="target"
         position={Position.Right}
-        className="w-4 h-4 bg-green-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
-        style={{ right: -8 }}
+        className={`w-4 h-4 border-2 border-white transition-all cursor-crosshair z-10 ${
+          !isConnectMode || isConnecting ? 'opacity-70 hover:opacity-100 group-hover:opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ right: -8, backgroundColor: '#10b981' }}
       />
       <Handle
-        id="target-bottom"
+        id="bottom"
         type="target"
         position={Position.Bottom}
-        className="w-4 h-4 bg-green-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
-        style={{ bottom: -8 }}
+        className={`w-4 h-4 border-2 border-white transition-all cursor-crosshair z-10 ${
+          !isConnectMode || isConnecting ? 'opacity-70 hover:opacity-100 group-hover:opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ bottom: -8, backgroundColor: '#10b981' }}
       />
       <Handle
-        id="target-left"
+        id="left"
         type="target"
         position={Position.Left}
-        className="w-4 h-4 bg-green-500 border-2 border-white opacity-70 hover:opacity-100 group-hover:opacity-100 transition-opacity cursor-crosshair z-10"
-        style={{ left: -8 }}
+        className={`w-4 h-4 border-2 border-white transition-all cursor-crosshair z-10 ${
+          !isConnectMode || isConnecting ? 'opacity-70 hover:opacity-100 group-hover:opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ left: -8, backgroundColor: '#10b981' }}
       />
     </div>
   );

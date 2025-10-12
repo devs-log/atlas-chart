@@ -6,6 +6,7 @@ import { useAtlasStore } from '@/store/useAtlasStore';
 import { applySimpleSceneLayout } from '@/lib/simpleLayouts';
 
 import GraphView from '@/components/GraphView';
+import DebugNode from '@/components/DebugNode';
 import EdgeShape from '@/components/EdgeShape';
 import StraightEdge from '@/components/StraightEdge';
 import StepEdge from '@/components/StepEdge';
@@ -15,7 +16,10 @@ import FullscreenButton from '@/components/FullscreenButton';
 import MenuBar from '@/components/MenuBar';
 
 // Define node and edge types outside component to prevent recreation
-const nodeTypes = { system: GraphView };
+const nodeTypes = { 
+  system: GraphView,
+  debug: DebugNode 
+};
 const edgeTypes = { 
   systemEdge: EdgeShape,
   straightEdge: StraightEdge,
@@ -23,7 +27,7 @@ const edgeTypes = {
 };
 
 export default function Editor() {
-  const { fitView, screenToFlowPosition } = useReactFlow();
+  const { fitView } = useReactFlow();
   
   const {
     systems,
@@ -44,7 +48,44 @@ export default function Editor() {
     syncToURL,
     getReactFlowNodes,
     getReactFlowEdges,
+    setConnecting,
   } = useAtlasStore();
+
+  // Debug: Check initial selectedTool value at mount time
+  console.log('Initial selectedTool:', selectedTool);
+  
+  // Additional debug info
+  console.log('React Flow nodes count:', getReactFlowNodes().length);
+  console.log('React Flow edges count:', getReactFlowEdges().length);
+  console.log('Systems count:', systems.length);
+
+  // Step 3: Add test debug nodes for isolation testing
+  useEffect(() => {
+    // Add debug nodes if they don't exist
+    const hasDebugNodes = systems.some(s => s.id === 'debug-1' || s.id === 'debug-2');
+    if (!hasDebugNodes) {
+      const debugNode1 = {
+        id: 'debug-1',
+        name: 'Debug Node 1',
+        type: 'debug' as any,
+        domain: 'Debug',
+        status: 'planned' as const,
+        x: 100,
+        y: 100,
+      };
+      const debugNode2 = {
+        id: 'debug-2', 
+        name: 'Debug Node 2',
+        type: 'debug' as any,
+        domain: 'Debug',
+        status: 'planned' as const,
+        x: 300,
+        y: 100,
+      };
+      addSystem(debugNode1);
+      addSystem(debugNode2);
+    }
+  }, [systems, addSystem]);
 
   // Apply layout only when scene changes, not when mode changes
   useEffect(() => {
@@ -119,11 +160,12 @@ export default function Editor() {
     
     if (selectedTool === 'add-node' && selectedNodeType) {
       // Create a new node at the clicked position
-      // Use React Flow's screenToFlowPosition to convert screen coordinates to flow coordinates
-      const position = screenToFlowPosition({
-        x: event.clientX,
-        y: event.clientY,
-      });
+      // Simple position calculation for now - will be improved later
+      const rect = (event.target as Element).getBoundingClientRect();
+      const position = {
+        x: event.clientX - rect.left - 100, // Offset to center the node
+        y: event.clientY - rect.top - 50,
+      };
       
       console.log('Creating new node at position:', position);
       
@@ -157,14 +199,34 @@ export default function Editor() {
   };
 
   const onConnect = (params: any) => {
-    console.log('onConnect triggered!', { params, selectedConnectionType, selectedTool });
+    console.log('🔗 onConnect fired', params);
+
+    // Only allow connections when connect tool is selected
+    if (selectedTool !== 'connect') {
+      console.log('Connection blocked - connect tool not selected');
+      return;
+    }
+
+    if (!params.source || !params.target) return;
+    if (params.source === params.target) return;
+
+    // Normalize handle IDs to remove any prefixes React Flow might have added
+    const normalizeHandle = (handleId?: string) => {
+      if (!handleId) return undefined;
+      // Remove any source- or target- prefixes that might exist
+      return handleId.replace(/^source-|^target-/, '');
+    };
+
     const newEdge = {
       id: `edge-${Date.now()}`,
       source: params.source,
       target: params.target,
+      sourceHandle: normalizeHandle(params.sourceHandle),
+      targetHandle: normalizeHandle(params.targetHandle),
       kind: 'other' as const,
       connectionType: selectedConnectionType,
     };
+
     addEdge(newEdge);
     console.log('Connection created:', newEdge);
   };
@@ -179,6 +241,7 @@ export default function Editor() {
   };
 
   const isValidConnection = (connection: any) => {
+    console.log('🔍 isValidConnection called with:', connection);
     // Allow all connections - this enables drag-to-connect functionality
     return true;
   };
@@ -189,6 +252,7 @@ export default function Editor() {
       {/* Main Canvas */}
       <div className="w-full h-full pt-12">
         <ReactFlow
+          key="editor-flow"
           nodes={getReactFlowNodes()}
           edges={getReactFlowEdges()}
           onMove={onMove}
@@ -196,6 +260,14 @@ export default function Editor() {
           onNodeDrag={onNodeDrag}
           onPaneClick={onPaneClick}
           onConnect={onConnect}
+          onConnectStart={(e, params) => {
+            console.log('🟡 onConnectStart', params);
+            setConnecting(true);
+          }}
+          onConnectEnd={(e) => {
+            console.log('🟢 onConnectEnd', e.target);
+            setConnecting(false);
+          }}
           isValidConnection={isValidConnection}
           fitView={false}
           fitViewOptions={{ padding: 0.1 }}
@@ -206,7 +278,7 @@ export default function Editor() {
           edgeTypes={edgeTypes}
           className="canvas-grid"
           nodesDraggable={true}
-          nodesConnectable={selectedTool === 'connect'}
+          nodesConnectable={true}
           elementsSelectable={true}
           connectionMode={ConnectionMode.Loose}
           connectionLineStyle={{ stroke: '#0078ff', strokeWidth: 2 }}

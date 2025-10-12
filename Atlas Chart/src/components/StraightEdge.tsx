@@ -1,8 +1,17 @@
 import React, { memo } from 'react';
-import { EdgeProps, getStraightPath, EdgeLabelRenderer } from 'reactflow';
+import { EdgeProps, getStraightPath, EdgeLabelRenderer, Position } from 'reactflow';
 import { ArrowRight, ArrowUp, ArrowDown, ArrowLeft } from 'lucide-react';
 
 import type { SystemEdge } from '@/lib/types';
+
+const getPositionFromHandle = (handleId?: string): Position => {
+  if (!handleId) return Position.Top;
+  if (handleId.includes('right')) return Position.Right;
+  if (handleId.includes('left')) return Position.Left;
+  if (handleId.includes('bottom')) return Position.Bottom;
+  if (handleId.includes('top')) return Position.Top;
+  return Position.Top;
+};
 
 const StraightEdgeComponent = memo(({
   id,
@@ -16,6 +25,10 @@ const StraightEdgeComponent = memo(({
   data,
   selected,
 }: EdgeProps<SystemEdge>) => {
+  // Use handle-specific positions if available, fallback to provided positions
+  const effectiveSourcePosition = getPositionFromHandle(data?.sourceHandle) || sourcePosition;
+  const effectiveTargetPosition = getPositionFromHandle(data?.targetHandle) || targetPosition;
+
   const [edgePath, labelX, labelY] = getStraightPath({
     sourceX,
     sourceY,
