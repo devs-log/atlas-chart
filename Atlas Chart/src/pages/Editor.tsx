@@ -6,7 +6,6 @@ import { useAtlasStore } from '@/store/useAtlasStore';
 import { applySimpleSceneLayout } from '@/lib/simpleLayouts';
 
 import GraphView from '@/components/GraphView';
-import DebugNode from '@/components/DebugNode';
 import EdgeShape from '@/components/EdgeShape';
 import StraightEdge from '@/components/StraightEdge';
 import StepEdge from '@/components/StepEdge';
@@ -17,8 +16,7 @@ import MenuBar from '@/components/MenuBar';
 
 // Define node and edge types outside component to prevent recreation
 const nodeTypes = { 
-  system: GraphView,
-  debug: DebugNode 
+  system: GraphView
 };
 const edgeTypes = { 
   systemEdge: EdgeShape,
@@ -59,33 +57,6 @@ export default function Editor() {
   console.log('React Flow edges count:', getReactFlowEdges().length);
   console.log('Systems count:', systems.length);
 
-  // Step 3: Add test debug nodes for isolation testing
-  useEffect(() => {
-    // Add debug nodes if they don't exist
-    const hasDebugNodes = systems.some(s => s.id === 'debug-1' || s.id === 'debug-2');
-    if (!hasDebugNodes) {
-      const debugNode1 = {
-        id: 'debug-1',
-        name: 'Debug Node 1',
-        type: 'debug' as any,
-        domain: 'Debug',
-        status: 'planned' as const,
-        x: 100,
-        y: 100,
-      };
-      const debugNode2 = {
-        id: 'debug-2', 
-        name: 'Debug Node 2',
-        type: 'debug' as any,
-        domain: 'Debug',
-        status: 'planned' as const,
-        x: 300,
-        y: 100,
-      };
-      addSystem(debugNode1);
-      addSystem(debugNode2);
-    }
-  }, [systems, addSystem]);
 
   // Apply layout only when scene changes, not when mode changes
   useEffect(() => {

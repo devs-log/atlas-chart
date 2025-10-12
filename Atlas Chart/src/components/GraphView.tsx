@@ -169,7 +169,7 @@ const SystemNodeComponent = memo(({ data, selected }: NodeProps<SystemNode>) => 
         )}
       </div>
 
-      {/* Connection Handles - Use simple IDs that React Flow expects */}
+      {/* Connection Handles - Only visible when connection tool is selected */}
       {/* Source handles (for initiating connections) */}
       <Handle
         id="top"
@@ -214,7 +214,7 @@ const SystemNodeComponent = memo(({ data, selected }: NodeProps<SystemNode>) => 
         type="target"
         position={Position.Top}
         className={`w-4 h-4 border-2 border-white transition-all cursor-crosshair z-10 ${
-          !isConnectMode || isConnecting ? 'opacity-70 hover:opacity-100 group-hover:opacity-100' : 'opacity-0 pointer-events-none'
+          isConnectMode && isConnecting ? 'opacity-70 hover:opacity-100 group-hover:opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         style={{ top: -8, backgroundColor: '#10b981' }}
       />
@@ -223,7 +223,7 @@ const SystemNodeComponent = memo(({ data, selected }: NodeProps<SystemNode>) => 
         type="target"
         position={Position.Right}
         className={`w-4 h-4 border-2 border-white transition-all cursor-crosshair z-10 ${
-          !isConnectMode || isConnecting ? 'opacity-70 hover:opacity-100 group-hover:opacity-100' : 'opacity-0 pointer-events-none'
+          isConnectMode && isConnecting ? 'opacity-70 hover:opacity-100 group-hover:opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         style={{ right: -8, backgroundColor: '#10b981' }}
       />
@@ -232,7 +232,7 @@ const SystemNodeComponent = memo(({ data, selected }: NodeProps<SystemNode>) => 
         type="target"
         position={Position.Bottom}
         className={`w-4 h-4 border-2 border-white transition-all cursor-crosshair z-10 ${
-          !isConnectMode || isConnecting ? 'opacity-70 hover:opacity-100 group-hover:opacity-100' : 'opacity-0 pointer-events-none'
+          isConnectMode && isConnecting ? 'opacity-70 hover:opacity-100 group-hover:opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         style={{ bottom: -8, backgroundColor: '#10b981' }}
       />
@@ -241,7 +241,7 @@ const SystemNodeComponent = memo(({ data, selected }: NodeProps<SystemNode>) => 
         type="target"
         position={Position.Left}
         className={`w-4 h-4 border-2 border-white transition-all cursor-crosshair z-10 ${
-          !isConnectMode || isConnecting ? 'opacity-70 hover:opacity-100 group-hover:opacity-100' : 'opacity-0 pointer-events-none'
+          isConnectMode && isConnecting ? 'opacity-70 hover:opacity-100 group-hover:opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         style={{ left: -8, backgroundColor: '#10b981' }}
       />
