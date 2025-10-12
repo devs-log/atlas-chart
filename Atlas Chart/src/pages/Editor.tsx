@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ReactFlow, Background, Controls, useReactFlow } from 'reactflow';
+import { ReactFlow, Background, Controls, useReactFlow, ConnectionMode, ConnectionLineType } from 'reactflow';
 import 'reactflow/dist/style.css';
 
 import { useAtlasStore } from '@/store/useAtlasStore';
@@ -29,10 +29,13 @@ export default function Editor() {
     systems,
     edges,
     scene,
+    camera,
+    focusNodeId,
     selectedTool,
     selectedNodeType,
     selectedConnectionType,
     setSystems,
+    setCamera,
     setSelectedNodeId,
     addSystem,
     addEdge,
@@ -43,16 +46,20 @@ export default function Editor() {
     getReactFlowEdges,
   } = useAtlasStore();
 
-  // Apply layout when scene changes
+  // Apply layout only when scene changes, not when mode changes
   useEffect(() => {
     if (systems.length === 0) return;
+    
+    // Skip layout if nodes already have positions (prevents repositioning during mode switches)
+    const hasPositions = systems.every(node => (node as any).x !== undefined && (node as any).y !== undefined);
+    if (hasPositions) return;
 
     const applyLayout = async () => {
       const layoutedNodes = await applySimpleSceneLayout(
         scene,
         systems,
         edges,
-        undefined, // No focus in editing mode
+        focusNodeId, // Use same focus logic as Viewer
         { centerX: 0, centerY: 0 }
       );
 
@@ -60,9 +67,9 @@ export default function Editor() {
     };
 
     applyLayout();
-  }, [scene, edges, setSystems]);
+  }, [scene, setSystems]); // Only reapply when scene changes
 
-  // Fit view when layout changes
+  // Only fit view when scene changes, not when edges change
   useEffect(() => {
     if (systems.length > 0) {
       setTimeout(() => {
@@ -82,27 +89,22 @@ export default function Editor() {
       const isFullscreen = !!document.fullscreenElement;
       useAtlasStore.getState().setShowFullscreen(isFullscreen);
       
-      // Refit view after fullscreen change
-      setTimeout(() => {
-        fitView({ padding: 0.1, duration: 200 });
-      }, 100);
+      // Don't refit view after fullscreen change to preserve node positions
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, [fitView]);
+  }, []); // Removed fitView from dependency array
 
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
-      setTimeout(() => {
-        fitView({ padding: 0.1, duration: 200 });
-      }, 100);
+      // Don't call fitView on resize to preserve node positions
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [fitView]);
+  }, []); // Removed fitView from dependency array
 
   const onNodeClick = (event: React.MouseEvent, node: any) => {
     if (selectedTool === 'connect') {
@@ -167,6 +169,15 @@ export default function Editor() {
     console.log('Connection created:', newEdge);
   };
 
+  const onMove = (event: any, viewport: any) => {
+    // Update camera state when viewport changes
+    setCamera({
+      x: viewport.x,
+      y: viewport.y,
+      zoom: viewport.zoom,
+    });
+  };
+
   const isValidConnection = (connection: any) => {
     // Allow all connections - this enables drag-to-connect functionality
     return true;
@@ -180,25 +191,26 @@ export default function Editor() {
         <ReactFlow
           nodes={getReactFlowNodes()}
           edges={getReactFlowEdges()}
+          onMove={onMove}
           onNodeClick={onNodeClick}
           onNodeDrag={onNodeDrag}
           onPaneClick={onPaneClick}
           onConnect={onConnect}
           isValidConnection={isValidConnection}
-          fitView
+          fitView={false}
           fitViewOptions={{ padding: 0.1 }}
           minZoom={0.1}
           maxZoom={3}
-          defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+          defaultViewport={{ x: camera.x, y: camera.y, zoom: camera.zoom }}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           className="canvas-grid"
           nodesDraggable={true}
           nodesConnectable={selectedTool === 'connect'}
           elementsSelectable={true}
-          connectionMode="loose"
+          connectionMode={ConnectionMode.Loose}
           connectionLineStyle={{ stroke: '#0078ff', strokeWidth: 2 }}
-          connectionLineType="step"
+          connectionLineType={ConnectionLineType.Step}
         >
           <Background 
             color="var(--line)" 

@@ -19,10 +19,8 @@ const StraightEdgeComponent = memo(({
   const [edgePath, labelX, labelY] = getStraightPath({
     sourceX,
     sourceY,
-    sourcePosition,
     targetX,
     targetY,
-    targetPosition,
   });
 
   // Determine edge style based on kind

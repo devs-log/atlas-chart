@@ -32,12 +32,14 @@ export default function Viewer() {
     systems,
     edges,
     scene,
+    camera,
     focusNodeId,
     selectedNodeId,
     showDetailCard,
     showCommandPalette,
     selectedConnectionType,
     setSystems,
+    setCamera,
     setFocusNodeId,
     setSelectedNodeId,
     addEdge,
@@ -46,9 +48,13 @@ export default function Viewer() {
     getReactFlowEdges,
   } = useAtlasStore();
 
-  // Apply layout when scene or focus changes
+  // Apply layout only when scene changes, not when focus or mode changes
   useEffect(() => {
     if (systems.length === 0) return;
+    
+    // Skip layout if nodes already have positions (prevents repositioning during mode switches)
+    const hasPositions = systems.every(node => (node as any).x !== undefined && (node as any).y !== undefined);
+    if (hasPositions) return;
 
     const applyLayout = async () => {
       const layoutedNodes = await applySimpleSceneLayout(
@@ -63,9 +69,9 @@ export default function Viewer() {
     };
 
     applyLayout();
-  }, [scene, focusNodeId, edges, setSystems]);
+  }, [scene, setSystems]); // Only reapply when scene changes, not when focusNodeId changes
 
-  // Fit view when layout changes
+  // Only fit view when scene or focus changes, not when edges change
   useEffect(() => {
     if (systems.length > 0) {
       setTimeout(() => {
@@ -85,27 +91,22 @@ export default function Viewer() {
       const isFullscreen = !!document.fullscreenElement;
       useAtlasStore.getState().setShowFullscreen(isFullscreen);
       
-      // Refit view after fullscreen change
-      setTimeout(() => {
-        fitView({ padding: 0.1, duration: 200 });
-      }, 100);
+      // Don't refit view after fullscreen change to preserve node positions
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, [fitView]);
+  }, []); // Removed fitView from dependency array
 
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
-      setTimeout(() => {
-        fitView({ padding: 0.1, duration: 200 });
-      }, 100);
+      // Don't call fitView on resize to preserve node positions
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [fitView]);
+  }, []); // Removed fitView from dependency array
 
   const onNodeClick = (event: React.MouseEvent, node: any) => {
     setSelectedNodeId(node.id);
@@ -138,6 +139,15 @@ export default function Viewer() {
     console.log('Connection created:', newEdge);
   };
 
+  const onMove = (event: any, viewport: any) => {
+    // Update camera state when viewport changes
+    setCamera({
+      x: viewport.x,
+      y: viewport.y,
+      zoom: viewport.zoom,
+    });
+  };
+
 
   return (
     <div className="w-full h-full relative">
@@ -146,15 +156,16 @@ export default function Viewer() {
         <ReactFlow
           nodes={getReactFlowNodes()}
           edges={getReactFlowEdges()}
+          onMove={onMove}
           onNodeClick={onNodeClick}
           onNodeDrag={onNodeDrag}
           onPaneClick={onPaneClick}
           onConnect={onConnect}
-          fitView
+          fitView={false}
           fitViewOptions={{ padding: 0.1 }}
           minZoom={0.1}
           maxZoom={3}
-          defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+          defaultViewport={{ x: camera.x, y: camera.y, zoom: camera.zoom }}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           className="canvas-grid"
