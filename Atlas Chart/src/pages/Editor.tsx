@@ -49,6 +49,20 @@ export default function Editor() {
     setConnecting,
   } = useAtlasStore();
 
+  // Map connection types to React Flow's ConnectionLineType
+  const getConnectionLineType = (connectionType: string) => {
+    switch (connectionType) {
+      case 'straight':
+        return ConnectionLineType.Straight;
+      case 'step':
+        return ConnectionLineType.Step;
+      case 'curved':
+        return ConnectionLineType.Bezier;
+      default:
+        return ConnectionLineType.Step;
+    }
+  };
+
   // Debug: Check initial selectedTool value at mount time
   console.log('Initial selectedTool:', selectedTool);
   
@@ -253,7 +267,7 @@ export default function Editor() {
           elementsSelectable={true}
           connectionMode={ConnectionMode.Loose}
           connectionLineStyle={{ stroke: '#0078ff', strokeWidth: 2 }}
-          connectionLineType={ConnectionLineType.Step}
+          connectionLineType={getConnectionLineType(selectedConnectionType)}
         >
           <Background 
             color="var(--line)" 
