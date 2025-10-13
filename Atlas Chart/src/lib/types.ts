@@ -98,6 +98,18 @@ export interface AtlasState {
   
   // Connection state
   isConnecting: boolean;
+  
+  // Radial menu state
+  radialMenu: {
+    isVisible: boolean;
+    position: { x: number; y: number };
+    clickPosition: { x: number; y: number };
+    edgeId?: string;
+    edgeData?: any; // React Flow Edge object
+  };
+  
+  // Edge selection state
+  selectedEdgeId?: string;
 }
 
 export interface SceneLayout {

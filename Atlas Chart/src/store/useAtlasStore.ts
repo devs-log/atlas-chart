@@ -74,6 +74,13 @@ interface AtlasStore extends AtlasState {
   // URL sync
   syncFromURL: () => void;
   syncToURL: () => void;
+  
+  // Radial menu actions
+  showRadialMenu: (position: { x: number; y: number }, clickPosition: { x: number; y: number }, edgeId?: string, edgeData?: any) => void;
+  hideRadialMenu: () => void;
+  
+  // Edge selection actions
+  setSelectedEdgeId: (edgeId?: string) => void;
 }
 
 const defaultCamera: CameraState = {
@@ -100,6 +107,14 @@ const defaultState: AtlasState = {
   searchResults: [],
   colorScheme: 'default',
   isConnecting: false,
+  radialMenu: {
+    isVisible: false,
+    position: { x: 0, y: 0 },
+    clickPosition: { x: 0, y: 0 },
+    edgeId: undefined,
+    edgeData: undefined,
+  },
+  selectedEdgeId: undefined,
 };
 
 export const useAtlasStore = create<AtlasStore>()(
@@ -428,6 +443,32 @@ export const useAtlasStore = create<AtlasStore>()(
       // Connection actions
       setConnecting: (connecting) => set((state) => {
         state.isConnecting = connecting;
+      }),
+      
+      // Radial menu actions
+  showRadialMenu: (position, clickPosition, edgeId, edgeData) => set((state) => {
+    state.radialMenu = {
+      isVisible: true,
+      position,
+      clickPosition,
+      edgeId,
+      edgeData,
+    };
+  }),
+      
+      hideRadialMenu: () => set((state) => {
+        state.radialMenu = {
+          isVisible: false,
+          position: { x: 0, y: 0 },
+          clickPosition: { x: 0, y: 0 },
+          edgeId: undefined,
+          edgeData: undefined,
+        };
+      }),
+      
+      // Edge selection actions
+      setSelectedEdgeId: (edgeId) => set((state) => {
+        state.selectedEdgeId = edgeId;
       }),
     }))
   )

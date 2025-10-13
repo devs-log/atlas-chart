@@ -50,3 +50,4 @@ The application was trying to load individual JavaScript files (`data-model.js`,
 
 ## Key Takeaway:
 **The root `index.html` is sacred - never touch it.** It's the development entry point and Vite handles everything else. When I modified it, I broke the entire development workflow.
+

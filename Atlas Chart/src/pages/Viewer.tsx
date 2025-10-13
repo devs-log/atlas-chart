@@ -15,6 +15,7 @@ import DetailCard from '@/components/DetailCard';
 import FullscreenButton from '@/components/FullscreenButton';
 import CommandPalette from '@/components/CommandPalette';
 import MenuBar from '@/components/MenuBar';
+import ConnectionContextMenu from '@/components/ConnectionContextMenu';
 
 // Define node and edge types outside component to prevent recreation
 const nodeTypes = { system: GraphView };
@@ -38,6 +39,9 @@ export default function Viewer() {
     showDetailCard,
     showCommandPalette,
     selectedConnectionType,
+    radialMenu,
+    selectedEdgeId,
+    mode,
     setSystems,
     setCamera,
     setFocusNodeId,
@@ -46,6 +50,9 @@ export default function Viewer() {
     syncToURL,
     getReactFlowNodes,
     getReactFlowEdges,
+    showRadialMenu,
+    hideRadialMenu,
+    setSelectedEdgeId,
   } = useAtlasStore();
 
   // Apply layout only when scene changes, not when focus or mode changes
@@ -111,10 +118,14 @@ export default function Viewer() {
   const onNodeClick = (event: React.MouseEvent, node: any) => {
     setSelectedNodeId(node.id);
     setFocusNodeId(node.id);
+    setSelectedEdgeId(undefined); // Clear edge selection when clicking a node
+    hideRadialMenu(); // Close the context menu when clicking a node
   };
 
   const onPaneClick = () => {
     setSelectedNodeId(undefined);
+    setSelectedEdgeId(undefined);
+    hideRadialMenu(); // Close the context menu when clicking on empty canvas
   };
 
   const onNodeDrag = (event: React.MouseEvent, node: any) => {
@@ -148,6 +159,33 @@ export default function Viewer() {
     });
   };
 
+  const onEdgeClick = (event: React.MouseEvent, edge: any) => {
+    event.stopPropagation();
+    
+    // Set the selected edge
+    setSelectedEdgeId(edge.id);
+    
+    // Only show context menu in edit mode
+    if (mode === 'editing') {
+      // Get the click position relative to the viewport
+      const rect = reactFlowWrapper.current?.getBoundingClientRect();
+      if (!rect) return;
+      
+      const clickPosition = {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top,
+      };
+      
+      // Position the radial menu further to the right from the click point
+      const menuPosition = {
+        x: clickPosition.x + 60,
+        y: clickPosition.y - 20,
+      };
+      
+      showRadialMenu(menuPosition, clickPosition, edge.id, edge);
+    }
+  };
+
 
   return (
     <div className="w-full h-full relative">
@@ -161,6 +199,7 @@ export default function Viewer() {
           onNodeDrag={onNodeDrag}
           onPaneClick={onPaneClick}
           onConnect={onConnect}
+          onEdgeClick={onEdgeClick}
           fitView={false}
           fitViewOptions={{ padding: 0.1 }}
           minZoom={0.1}
@@ -206,6 +245,21 @@ export default function Viewer() {
       {/* Command Palette */}
       {showCommandPalette && (
         <CommandPalette />
+      )}
+      
+      {/* Connection Context Menu - Only in Edit Mode */}
+      {mode === 'editing' && (
+        <ConnectionContextMenu
+          isVisible={radialMenu.isVisible}
+          position={radialMenu.position}
+          clickPosition={radialMenu.clickPosition}
+          edgeData={radialMenu.edgeData}
+          onClose={hideRadialMenu}
+          onAction={(action) => {
+            console.log('Connection context menu action:', action, 'on edge:', radialMenu.edgeId);
+            hideRadialMenu();
+          }}
+        />
       )}
     </div>
   );

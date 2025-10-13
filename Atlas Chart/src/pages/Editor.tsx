@@ -13,6 +13,7 @@ import ToolShelf from '@/components/ToolShelf';
 import InspectorPanel from '@/components/InspectorPanel';
 import FullscreenButton from '@/components/FullscreenButton';
 import MenuBar from '@/components/MenuBar';
+import ConnectionContextMenu from '@/components/ConnectionContextMenu';
 
 // Define node and edge types outside component to prevent recreation
 const nodeTypes = { 
@@ -36,6 +37,9 @@ export default function Editor() {
     selectedTool,
     selectedNodeType,
     selectedConnectionType,
+    radialMenu,
+    selectedEdgeId,
+    mode,
     setSystems,
     setCamera,
     setSelectedNodeId,
@@ -47,6 +51,9 @@ export default function Editor() {
     getReactFlowNodes,
     getReactFlowEdges,
     setConnecting,
+    showRadialMenu,
+    hideRadialMenu,
+    setSelectedEdgeId,
   } = useAtlasStore();
 
   // Map connection types to React Flow's ConnectionLineType
@@ -138,6 +145,8 @@ export default function Editor() {
       return;
     }
     setSelectedNodeId(node.id);
+    setSelectedEdgeId(undefined); // Clear edge selection when clicking a node
+    hideRadialMenu(); // Close the context menu when clicking a node
   };
 
   const onPaneClick = (event: React.MouseEvent) => {
@@ -171,6 +180,8 @@ export default function Editor() {
       setSelectedTool('select');
     } else {
       setSelectedNodeId(undefined);
+      setSelectedEdgeId(undefined);
+      hideRadialMenu(); // Close the context menu when clicking on empty canvas
     }
   };
 
@@ -181,6 +192,34 @@ export default function Editor() {
         ? { ...s, x: node.position.x, y: node.position.y }
         : s
     ));
+  };
+
+  const onEdgeClick = (event: React.MouseEvent, edge: any) => {
+    event.stopPropagation();
+    
+    // Set the selected edge
+    setSelectedEdgeId(edge.id);
+    
+    // Only show context menu in edit mode (Editor should always be in edit mode)
+    if (mode === 'editing') {
+      // Get the click position relative to the viewport
+      const reactFlowWrapper = document.querySelector('.react-flow');
+      if (!reactFlowWrapper) return;
+      
+      const rect = reactFlowWrapper.getBoundingClientRect();
+      const clickPosition = {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top,
+      };
+      
+      // Position the radial menu further to the right from the click point
+      const menuPosition = {
+        x: clickPosition.x + 60,
+        y: clickPosition.y - 20,
+      };
+      
+      showRadialMenu(menuPosition, clickPosition, edge.id, edge);
+    }
   };
 
   const onConnect = (params: any) => {
@@ -245,6 +284,7 @@ export default function Editor() {
           onNodeDrag={onNodeDrag}
           onPaneClick={onPaneClick}
           onConnect={onConnect}
+          onEdgeClick={onEdgeClick}
           onConnectStart={(e, params) => {
             console.log('🟡 onConnectStart', params);
             setConnecting(true);
@@ -296,6 +336,21 @@ export default function Editor() {
       <div className="absolute top-16 right-4 flex items-center gap-2 pointer-events-none">
         <FullscreenButton />
       </div>
+      
+      {/* Connection Context Menu - Only in Edit Mode */}
+      {mode === 'editing' && (
+        <ConnectionContextMenu
+          isVisible={radialMenu.isVisible}
+          position={radialMenu.position}
+          clickPosition={radialMenu.clickPosition}
+          edgeData={radialMenu.edgeData}
+          onClose={hideRadialMenu}
+          onAction={(action) => {
+            console.log('Connection context menu action:', action, 'on edge:', radialMenu.edgeId);
+            hideRadialMenu();
+          }}
+        />
+      )}
     </div>
   );
 }

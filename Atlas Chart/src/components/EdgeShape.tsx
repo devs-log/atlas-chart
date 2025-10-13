@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { EdgeProps, getBezierPath, EdgeLabelRenderer, Position } from 'reactflow';
 import { ArrowRight, ArrowUp, ArrowDown, ArrowLeft } from 'lucide-react';
+import { useAtlasStore } from '@/store/useAtlasStore';
 
 import type { SystemEdge } from '@/lib/types';
 
@@ -25,6 +26,8 @@ const EdgeComponent = memo(({
   data,
   selected,
 }: EdgeProps<SystemEdge>) => {
+  const selectedEdgeId = useAtlasStore((state) => state.selectedEdgeId);
+  
   // Use handle-specific positions if available, fallback to provided positions
   const effectiveSourcePosition = getPositionFromHandle(data?.sourceHandle) || sourcePosition;
   const effectiveTargetPosition = getPositionFromHandle(data?.targetHandle) || targetPosition;
@@ -78,9 +81,39 @@ const EdgeComponent = memo(({
 
   const edgeStyle = getEdgeStyle(data?.kind || 'sync');
   const isSelected = selected || false;
+  const isEdgeSelected = selectedEdgeId === id;
 
   return (
     <>
+      {/* Invisible wider path for better click detection */}
+      <path
+        id={`${id}-click-area`}
+        style={{
+          fill: 'none',
+          stroke: 'transparent',
+          strokeWidth: 20, // Much wider for easier clicking
+          cursor: 'pointer',
+        }}
+        d={edgePath}
+        className="react-flow__edge-path"
+      />
+      
+      {/* Selection effect - subtle highlight */}
+      {isEdgeSelected && (
+        <path
+          id={`${id}-selection`}
+          style={{
+            fill: 'none',
+            stroke: '#64748b',
+            strokeWidth: 3,
+            opacity: 0.8,
+          }}
+          d={edgePath}
+          className="react-flow__edge-path"
+        />
+      )}
+      
+      {/* Visible edge path */}
       <path
         id={id}
         style={{
