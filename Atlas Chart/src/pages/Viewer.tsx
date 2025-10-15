@@ -16,6 +16,7 @@ import FullscreenButton from '@/components/FullscreenButton';
 import CommandPalette from '@/components/CommandPalette';
 import MenuBar from '@/components/MenuBar';
 import ConnectionContextMenu from '@/components/ConnectionContextMenu';
+import ConnectionEditor from '@/components/ConnectionEditor';
 
 // Define node and edge types outside component to prevent recreation
 const nodeTypes = { system: GraphView };
@@ -54,6 +55,12 @@ export default function Viewer() {
     hideRadialMenu,
     setSelectedEdgeId,
   } = useAtlasStore();
+
+  // State for connection editor
+  const [showConnectionEditor, setShowConnectionEditor] = React.useState(false);
+  const [editorAction, setEditorAction] = React.useState<string>('');
+  const [editorEdgeId, setEditorEdgeId] = React.useState<string>('');
+  const [editorEdgeData, setEditorEdgeData] = React.useState<any>(null);
 
   // Apply layout only when scene changes, not when focus or mode changes
   useEffect(() => {
@@ -257,9 +264,30 @@ export default function Viewer() {
           onClose={hideRadialMenu}
           onAction={(action) => {
             console.log('Connection context menu action:', action, 'on edge:', radialMenu.edgeId);
+            // Store edge data before hiding the menu
+            setEditorEdgeId(radialMenu.edgeId || '');
+            setEditorEdgeData(radialMenu.edgeData);
+            setEditorAction(action);
+            setShowConnectionEditor(true);
             hideRadialMenu();
           }}
         />
+      )}
+      
+      {/* Connection Editor */}
+      {showConnectionEditor && editorEdgeId && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <ConnectionEditor
+            edgeId={editorEdgeId}
+            edgeData={editorEdgeData}
+            onClose={() => {
+              setShowConnectionEditor(false);
+              setEditorEdgeId('');
+              setEditorEdgeData(null);
+            }}
+            action={editorAction}
+          />
+        </div>
       )}
     </div>
   );

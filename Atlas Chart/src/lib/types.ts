@@ -59,6 +59,14 @@ export interface SystemEdge {
   note?: string;
   animated?: boolean;
   connectionType?: string;
+  
+  // Connection editor properties
+  label?: string;          // Custom label text
+  lineStyle?: 'solid' | 'dashed' | 'dotted';  // Line style
+  lineWeight?: 'thin' | 'normal' | 'bold';     // Line weight
+  lineColor?: string;      // Custom line color
+  elbowPoints?: Array<{ x: number; y: number }>; // Control points for elbow connections
+  routing?: 'direct' | 'around'; // Routing preference
 }
 
 export interface CameraState {

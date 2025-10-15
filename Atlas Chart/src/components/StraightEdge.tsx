@@ -32,6 +32,7 @@ const StraightEdgeComponent = memo(({
   const effectiveSourcePosition = getPositionFromHandle(data?.sourceHandle) || sourcePosition;
   const effectiveTargetPosition = getPositionFromHandle(data?.targetHandle) || targetPosition;
 
+  // Straight edges don't change based on routing - they stay straight
   const [edgePath, labelX, labelY] = getStraightPath({
     sourceX,
     sourceY,
@@ -39,45 +40,65 @@ const StraightEdgeComponent = memo(({
     targetY,
   });
 
-  // Determine edge style based on kind
-  const getEdgeStyle = (kind: SystemEdge['kind']) => {
-    const baseStyle = {
-      strokeWidth: 2,
-      stroke: 'var(--line)',
+  // Determine edge style based on kind and custom properties
+  const getEdgeStyle = (kind: SystemEdge['kind'], customStyle?: Partial<SystemEdge>) => {
+    // Start with base style
+    let strokeWidth = 2;
+    let stroke = 'var(--line)';
+    let strokeDasharray = 'none';
+
+    // Apply custom line weight
+    if (customStyle?.lineWeight) {
+      switch (customStyle.lineWeight) {
+        case 'thin': strokeWidth = 1; break;
+        case 'normal': strokeWidth = 2; break;
+        case 'bold': strokeWidth = 3; break;
+      }
+    }
+
+    // Apply custom line color
+    if (customStyle?.lineColor) {
+      stroke = customStyle.lineColor;
+    }
+
+    // Apply custom line style
+    if (customStyle?.lineStyle) {
+      switch (customStyle.lineStyle) {
+        case 'solid': strokeDasharray = 'none'; break;
+        case 'dashed': strokeDasharray = '5,5'; break;
+        case 'dotted': strokeDasharray = '2,2'; break;
+      }
+    } else {
+      // Fall back to kind-based styling if no custom style
+      switch (kind) {
+        case 'sync':
+          strokeDasharray = 'none';
+          break;
+        case 'async':
+          strokeDasharray = '5,5';
+          break;
+        case 'event':
+          strokeDasharray = '2,3';
+          break;
+        case 'batch':
+          strokeDasharray = '8,4';
+          break;
+        case 'other':
+        default:
+          strokeDasharray = '3,2';
+          break;
+      }
+    }
+
+    return {
+      strokeWidth,
+      stroke,
+      strokeDasharray,
       fill: 'none',
     };
-
-    switch (kind) {
-      case 'sync':
-        return {
-          ...baseStyle,
-          strokeDasharray: 'none',
-        };
-      case 'async':
-        return {
-          ...baseStyle,
-          strokeDasharray: '5,5',
-        };
-      case 'event':
-        return {
-          ...baseStyle,
-          strokeDasharray: '2,3',
-        };
-      case 'batch':
-        return {
-          ...baseStyle,
-          strokeDasharray: '8,4',
-        };
-      case 'other':
-      default:
-        return {
-          ...baseStyle,
-          strokeDasharray: '3,2',
-        };
-    }
   };
 
-  const edgeStyle = getEdgeStyle(data?.kind || 'sync');
+  const edgeStyle = getEdgeStyle(data?.kind || 'sync', data);
   const isSelected = selected || false;
   const isEdgeSelected = selectedEdgeId === id;
 
@@ -127,7 +148,7 @@ const StraightEdgeComponent = memo(({
       />
       
       {/* Edge Label */}
-      {data?.note && (
+      {(data?.label || data?.note) && (
         <EdgeLabelRenderer>
           <div
             style={{
@@ -143,8 +164,8 @@ const StraightEdgeComponent = memo(({
               {data.kind === 'async' && <ArrowDown className="w-3 h-3" />}
               {data.kind === 'event' && <ArrowUp className="w-3 h-3" />}
               {data.kind === 'batch' && <ArrowLeft className="w-3 h-3" />}
-              <span className="truncate" title={data.note}>
-                {data.note}
+              <span className="truncate" title={data.label || data.note}>
+                {data.label || data.note}
               </span>
             </div>
           </div>

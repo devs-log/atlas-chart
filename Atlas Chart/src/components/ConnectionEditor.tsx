@@ -1,0 +1,398 @@
+import React, { useState, useEffect } from 'react';
+import { useAtlasStore } from '@/store/useAtlasStore';
+import { 
+  Type, 
+  Trash2, 
+  CornerUpRight, 
+  ArrowRight, 
+  Minus, 
+  Link, 
+  Bold, 
+  Palette,
+  Check,
+  X
+} from 'lucide-react';
+
+interface ConnectionEditorProps {
+  edgeId: string;
+  edgeData: any;
+  onClose: () => void;
+  action: string;
+}
+
+const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
+  edgeId,
+  edgeData,
+  onClose,
+  action
+}) => {
+  const [inputValue, setInputValue] = useState('');
+  const [selectedOption, setSelectedOption] = useState<string>('');
+  
+  const {
+    addConnectionLabel,
+    deleteConnection,
+    addElbowPoint,
+    changeConnectionRouting,
+    changeConnectionType,
+    changeLineStyle,
+    changeLineWeight,
+    changeLineColor,
+  } = useAtlasStore();
+
+  useEffect(() => {
+    // Initialize input values based on current edge data
+    switch (action) {
+      case 'add-label':
+        setInputValue(edgeData?.label || edgeData?.note || '');
+        break;
+      case 'connection-type':
+        setSelectedOption(edgeData?.connectionType || 'curved');
+        break;
+      case 'line-style':
+        setSelectedOption(edgeData?.lineStyle || 'solid');
+        break;
+      case 'line-weight':
+        setSelectedOption(edgeData?.lineWeight || 'normal');
+        break;
+      case 'line-color':
+        setInputValue(edgeData?.lineColor || '#6b7280');
+        break;
+      case 'routing':
+        setSelectedOption(edgeData?.routing || 'direct');
+        break;
+    }
+  }, [action, edgeData]);
+
+  const handleSubmit = () => {
+    switch (action) {
+      case 'add-label':
+        if (inputValue.trim()) {
+          addConnectionLabel(edgeId, inputValue.trim());
+        }
+        break;
+      case 'delete':
+        deleteConnection(edgeId);
+        break;
+      case 'add-elbow':
+        // For elbow points, we'll add a point at the center of the edge for now
+        // In a real implementation, this would be more sophisticated
+        const centerX = 0; // This would be calculated based on edge geometry
+        const centerY = 0;
+        addElbowPoint(edgeId, { x: centerX, y: centerY });
+        break;
+      case 'routing':
+        changeConnectionRouting(edgeId, selectedOption as 'direct' | 'around');
+        break;
+      case 'connection-type':
+        changeConnectionType(edgeId, selectedOption);
+        break;
+      case 'line-style':
+        changeLineStyle(edgeId, selectedOption as 'solid' | 'dashed' | 'dotted');
+        break;
+      case 'line-weight':
+        changeLineWeight(edgeId, selectedOption as 'thin' | 'normal' | 'bold');
+        break;
+      case 'line-color':
+        changeLineColor(edgeId, inputValue);
+        break;
+    }
+    onClose();
+  };
+
+  const handleCancel = () => {
+    onClose();
+  };
+
+  const renderContent = () => {
+    switch (action) {
+      case 'add-label':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Connection Label
+              </label>
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder="Enter connection label..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                autoFocus
+              />
+            </div>
+          </div>
+        );
+
+      case 'delete':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              <span className="font-medium">Delete Connection</span>
+            </div>
+            <p className="text-sm text-gray-600">
+              Are you sure you want to delete this connection? This action cannot be undone.
+            </p>
+          </div>
+        );
+
+      case 'connection-type':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Connection Type
+              </label>
+              <div className="space-y-2">
+                {[
+                  { value: 'curved', label: 'Curved', icon: Link },
+                  { value: 'straight', label: 'Straight', icon: Minus },
+                  { value: 'step', label: 'Step', icon: CornerUpRight },
+                ].map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <button
+                      key={option.value}
+                      onClick={() => setSelectedOption(option.value)}
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-md border transition-colors ${
+                        selectedOption === option.value
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span>{option.label}</span>
+                      {selectedOption === option.value && (
+                        <Check className="w-4 h-4 ml-auto" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'line-style':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Line Style
+              </label>
+              <div className="space-y-2">
+                {[
+                  { value: 'solid', label: 'Solid' },
+                  { value: 'dashed', label: 'Dashed' },
+                  { value: 'dotted', label: 'Dotted' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setSelectedOption(option.value)}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-md border transition-colors ${
+                      selectedOption === option.value
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className={`w-6 h-0.5 border-t-2 ${
+                      option.value === 'solid' ? 'border-t-2 border-solid' :
+                      option.value === 'dashed' ? 'border-t-2 border-dashed' :
+                      'border-t-2 border-dotted'
+                    }`} />
+                    <span>{option.label}</span>
+                    {selectedOption === option.value && (
+                      <Check className="w-4 h-4 ml-auto" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'line-weight':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Line Weight
+              </label>
+              <div className="space-y-2">
+                {[
+                  { value: 'thin', label: 'Thin', weight: 1 },
+                  { value: 'normal', label: 'Normal', weight: 2 },
+                  { value: 'bold', label: 'Bold', weight: 3 },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setSelectedOption(option.value)}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-md border transition-colors ${
+                      selectedOption === option.value
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div 
+                      className="w-6 h-0.5 bg-gray-600"
+                      style={{ height: `${option.weight}px` }}
+                    />
+                    <span>{option.label}</span>
+                    {selectedOption === option.value && (
+                      <Check className="w-4 h-4 ml-auto" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'line-color':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Line Color
+              </label>
+              <div className="flex gap-3">
+                <input
+                  type="color"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="#6b7280"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="grid grid-cols-6 gap-2 mt-3">
+                {[
+                  '#6b7280', '#dc2626', '#ea580c', '#d97706', 
+                  '#059669', '#0891b2', '#7c3aed', '#be185d'
+                ].map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => setInputValue(color)}
+                    className={`w-8 h-8 rounded border-2 ${
+                      inputValue === color ? 'border-blue-500' : 'border-gray-300'
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'routing':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Connection Routing
+              </label>
+              <div className="space-y-2">
+                {[
+                  { value: 'direct', label: 'Direct', description: 'Go straight between nodes' },
+                  { value: 'around', label: 'Around', description: 'Route around other nodes' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setSelectedOption(option.value)}
+                    className={`w-full flex flex-col items-start gap-1 px-3 py-2 rounded-md border transition-colors ${
+                      selectedOption === option.value
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <span className="font-medium">{option.label}</span>
+                    <span className="text-xs text-gray-500">{option.description}</span>
+                    {selectedOption === option.value && (
+                      <Check className="w-4 h-4 ml-auto" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'add-elbow':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 text-blue-600">
+              <CornerUpRight className="w-5 h-5" />
+              <span className="font-medium">Add Elbow Point</span>
+            </div>
+            <p className="text-sm text-gray-600">
+              An elbow point will be added to the center of this connection, allowing you to create custom routing.
+            </p>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  const getTitle = () => {
+    switch (action) {
+      case 'add-label': return 'Add Label';
+      case 'delete': return 'Delete Connection';
+      case 'add-elbow': return 'Add Elbow Point';
+      case 'routing': return 'Change Routing';
+      case 'connection-type': return 'Connection Type';
+      case 'line-style': return 'Line Style';
+      case 'line-weight': return 'Line Weight';
+      case 'line-color': return 'Line Color';
+      default: return 'Connection Options';
+    }
+  };
+
+  return (
+    <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-4 min-w-[300px] max-w-[400px]">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-900">{getTitle()}</h3>
+        <button
+          onClick={handleCancel}
+          className="text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Content */}
+      {renderContent()}
+
+      {/* Actions */}
+      <div className="flex justify-end gap-2 mt-6">
+        <button
+          onClick={handleCancel}
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSubmit}
+          className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors ${
+            action === 'delete' 
+              ? 'bg-red-600 hover:bg-red-700' 
+              : 'bg-blue-600 hover:bg-blue-700'
+          }`}
+        >
+          {action === 'delete' ? 'Delete' : 'Apply'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ConnectionEditor;

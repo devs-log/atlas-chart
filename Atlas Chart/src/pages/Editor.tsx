@@ -14,6 +14,7 @@ import InspectorPanel from '@/components/InspectorPanel';
 import FullscreenButton from '@/components/FullscreenButton';
 import MenuBar from '@/components/MenuBar';
 import ConnectionContextMenu from '@/components/ConnectionContextMenu';
+import ConnectionEditor from '@/components/ConnectionEditor';
 
 // Define node and edge types outside component to prevent recreation
 const nodeTypes = { 
@@ -55,6 +56,12 @@ export default function Editor() {
     hideRadialMenu,
     setSelectedEdgeId,
   } = useAtlasStore();
+
+  // State for connection editor
+  const [showConnectionEditor, setShowConnectionEditor] = React.useState(false);
+  const [editorAction, setEditorAction] = React.useState<string>('');
+  const [editorEdgeId, setEditorEdgeId] = React.useState<string>('');
+  const [editorEdgeData, setEditorEdgeData] = React.useState<any>(null);
 
   // Map connection types to React Flow's ConnectionLineType
   const getConnectionLineType = (connectionType: string) => {
@@ -347,9 +354,30 @@ export default function Editor() {
           onClose={hideRadialMenu}
           onAction={(action) => {
             console.log('Connection context menu action:', action, 'on edge:', radialMenu.edgeId);
+            // Store edge data before hiding the menu
+            setEditorEdgeId(radialMenu.edgeId || '');
+            setEditorEdgeData(radialMenu.edgeData);
+            setEditorAction(action);
+            setShowConnectionEditor(true);
             hideRadialMenu();
           }}
         />
+      )}
+      
+      {/* Connection Editor */}
+      {showConnectionEditor && editorEdgeId && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <ConnectionEditor
+            edgeId={editorEdgeId}
+            edgeData={editorEdgeData}
+            onClose={() => {
+              setShowConnectionEditor(false);
+              setEditorEdgeId('');
+              setEditorEdgeData(null);
+            }}
+            action={editorAction}
+          />
+        </div>
       )}
     </div>
   );

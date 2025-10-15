@@ -81,6 +81,16 @@ interface AtlasStore extends AtlasState {
   
   // Edge selection actions
   setSelectedEdgeId: (edgeId?: string) => void;
+  
+  // Connection editor actions
+  addConnectionLabel: (edgeId: string, label: string) => void;
+  deleteConnection: (edgeId: string) => void;
+  addElbowPoint: (edgeId: string, point: { x: number; y: number }) => void;
+  changeConnectionRouting: (edgeId: string, routing: 'direct' | 'around') => void;
+  changeConnectionType: (edgeId: string, type: string) => void;
+  changeLineStyle: (edgeId: string, style: 'solid' | 'dashed' | 'dotted') => void;
+  changeLineWeight: (edgeId: string, weight: 'thin' | 'normal' | 'bold') => void;
+  changeLineColor: (edgeId: string, color: string) => void;
 }
 
 const defaultCamera: CameraState = {
@@ -469,6 +479,75 @@ export const useAtlasStore = create<AtlasStore>()(
       // Edge selection actions
       setSelectedEdgeId: (edgeId) => set((state) => {
         state.selectedEdgeId = edgeId;
+      }),
+      
+      // Connection editor actions
+      addConnectionLabel: (edgeId, label) => set((state) => {
+        const index = state.edges.findIndex((e: any) => e.id === edgeId);
+        if (index !== -1) {
+          state.edges[index].label = label;
+          state.hasUnsavedChanges = true;
+        }
+      }),
+      
+      deleteConnection: (edgeId) => set((state) => {
+        state.edges = state.edges.filter((e: any) => e.id !== edgeId);
+        state.hasUnsavedChanges = true;
+        // Clear selection if this edge was selected
+        if (state.selectedEdgeId === edgeId) {
+          state.selectedEdgeId = undefined;
+        }
+      }),
+      
+      addElbowPoint: (edgeId, point) => set((state) => {
+        const index = state.edges.findIndex((e: any) => e.id === edgeId);
+        if (index !== -1) {
+          if (!state.edges[index].elbowPoints) {
+            state.edges[index].elbowPoints = [];
+          }
+          state.edges[index].elbowPoints!.push(point);
+          state.hasUnsavedChanges = true;
+        }
+      }),
+      
+      changeConnectionRouting: (edgeId, routing) => set((state) => {
+        const index = state.edges.findIndex((e: any) => e.id === edgeId);
+        if (index !== -1) {
+          state.edges[index].routing = routing;
+          state.hasUnsavedChanges = true;
+        }
+      }),
+      
+      changeConnectionType: (edgeId, type) => set((state) => {
+        const index = state.edges.findIndex((e: any) => e.id === edgeId);
+        if (index !== -1) {
+          state.edges[index].connectionType = type;
+          state.hasUnsavedChanges = true;
+        }
+      }),
+      
+      changeLineStyle: (edgeId, style) => set((state) => {
+        const index = state.edges.findIndex((e: any) => e.id === edgeId);
+        if (index !== -1) {
+          state.edges[index].lineStyle = style;
+          state.hasUnsavedChanges = true;
+        }
+      }),
+      
+      changeLineWeight: (edgeId, weight) => set((state) => {
+        const index = state.edges.findIndex((e: any) => e.id === edgeId);
+        if (index !== -1) {
+          state.edges[index].lineWeight = weight;
+          state.hasUnsavedChanges = true;
+        }
+      }),
+      
+      changeLineColor: (edgeId, color) => set((state) => {
+        const index = state.edges.findIndex((e: any) => e.id === edgeId);
+        if (index !== -1) {
+          state.edges[index].lineColor = color;
+          state.hasUnsavedChanges = true;
+        }
       }),
     }))
   )
