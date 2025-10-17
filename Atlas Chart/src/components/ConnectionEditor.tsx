@@ -10,7 +10,8 @@ import {
   Bold, 
   Palette,
   Check,
-  X
+  X,
+  Zap
 } from 'lucide-react';
 
 interface ConnectionEditorProps {
@@ -75,11 +76,30 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
         deleteConnection(edgeId);
         break;
       case 'add-elbow':
-        // For elbow points, we'll add a point at the center of the edge for now
-        // In a real implementation, this would be more sophisticated
-        const centerX = 0; // This would be calculated based on edge geometry
-        const centerY = 0;
-        addElbowPoint(edgeId, { x: centerX, y: centerY });
+        // First, ensure the connection is of type 'elbow'
+        if (edgeData?.connectionType !== 'elbow') {
+          changeConnectionType(edgeId, 'elbow');
+        }
+        // Add an elbow point at the midpoint of the connection
+        // We need to calculate this based on the edge geometry
+        const sourceNode = useAtlasStore.getState().getSystemById(edgeData?.source);
+        const targetNode = useAtlasStore.getState().getSystemById(edgeData?.target);
+        
+        if (sourceNode && targetNode) {
+          const sourceX = (sourceNode as any).x || 0;
+          const sourceY = (sourceNode as any).y || 0;
+          const targetX = (targetNode as any).x || 0;
+          const targetY = (targetNode as any).y || 0;
+          
+          // Calculate midpoint
+          const midX = (sourceX + targetX) / 2;
+          const midY = (sourceY + targetY) / 2;
+          
+          console.log('Adding elbow point at midpoint:', { midX, midY });
+          addElbowPoint(edgeId, { x: midX, y: midY });
+        } else {
+          console.warn('Could not find source or target node for edge:', edgeId);
+        }
         break;
       case 'routing':
         changeConnectionRouting(edgeId, selectedOption as 'direct' | 'around');
@@ -150,6 +170,7 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
                   { value: 'curved', label: 'Curved', icon: Link },
                   { value: 'straight', label: 'Straight', icon: Minus },
                   { value: 'step', label: 'Step', icon: CornerUpRight },
+                  { value: 'elbow', label: 'Elbow', icon: Zap },
                 ].map((option) => {
                   const Icon = option.icon;
                   return (
@@ -328,12 +349,38 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
         return (
           <div className="space-y-4">
             <div className="flex items-center gap-3 text-blue-600">
-              <CornerUpRight className="w-5 h-5" />
-              <span className="font-medium">Add Elbow Point</span>
+              <Zap className="w-5 h-5" />
+              <span className="font-medium">Elbow Points</span>
             </div>
             <p className="text-sm text-gray-600">
-              An elbow point will be added to the center of this connection, allowing you to create custom routing.
+              Manage elbow points for custom connection routing. Double-click on the connection to add points, right-click points to remove them.
             </p>
+            {edgeData?.elbowPoints && edgeData.elbowPoints.length > 0 && (
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-gray-700">Current Points:</div>
+                <div className="space-y-1">
+                  {edgeData.elbowPoints.map((point: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-md">
+                      <span className="text-sm text-gray-600">
+                        Point {index + 1}: ({Math.round(point.x)}, {Math.round(point.y)})
+                      </span>
+                      <button
+                        onClick={() => {
+                          const newPoints = edgeData.elbowPoints.filter((_: any, i: number) => i !== index);
+                          useAtlasStore.getState().updateEdge(edgeId, { elbowPoints: newPoints });
+                        }}
+                        className="text-red-500 hover:text-red-700 text-sm"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="text-xs text-gray-500">
+              💡 Tip: Select the connection and double-click anywhere on it to add a new elbow point at that location.
+            </div>
           </div>
         );
 
@@ -346,7 +393,7 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
     switch (action) {
       case 'add-label': return 'Add Label';
       case 'delete': return 'Delete Connection';
-      case 'add-elbow': return 'Add Elbow Point';
+      case 'add-elbow': return 'Elbow Points';
       case 'routing': return 'Change Routing';
       case 'connection-type': return 'Connection Type';
       case 'line-style': return 'Line Style';

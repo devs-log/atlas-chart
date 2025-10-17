@@ -9,6 +9,7 @@ import GraphView from '@/components/GraphView';
 import EdgeShape from '@/components/EdgeShape';
 import StraightEdge from '@/components/StraightEdge';
 import StepEdge from '@/components/StepEdge';
+import ElbowEdge from '@/components/ElbowEdge';
 import ToolShelf from '@/components/ToolShelf';
 import InspectorPanel from '@/components/InspectorPanel';
 import FullscreenButton from '@/components/FullscreenButton';
@@ -24,6 +25,7 @@ const edgeTypes = {
   systemEdge: EdgeShape,
   straightEdge: StraightEdge,
   stepEdge: StepEdge,
+  elbowEdge: ElbowEdge,
 };
 
 export default function Editor() {
@@ -79,6 +81,7 @@ export default function Editor() {
 
   // Debug: Check initial selectedTool value at mount time
   console.log('Initial selectedTool:', selectedTool);
+  console.log('Selected edge ID:', selectedEdgeId);
   
   // Additional debug info
   console.log('React Flow nodes count:', getReactFlowNodes().length);
@@ -202,7 +205,20 @@ export default function Editor() {
   };
 
   const onEdgeClick = (event: React.MouseEvent, edge: any) => {
+    // Check if the click was on an elbow point by looking at the target
+    const target = event.target as Element;
+    const isElbowPointClick = target.closest('[data-elbow-point]') || 
+                             target.closest('circle[style*="cursor: grab"]') ||
+                             target.closest('g[style*="cursor: grab"]');
+    
+    if (isElbowPointClick) {
+      console.log('Click was on elbow point, not handling edge click');
+      return; // Don't interfere with elbow point interactions
+    }
+    
     event.stopPropagation();
+    
+    console.log('Edge clicked:', edge.id, 'type:', edge.type, 'data:', edge.data);
     
     // Set the selected edge
     setSelectedEdgeId(edge.id);

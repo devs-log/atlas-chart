@@ -16,7 +16,8 @@ import {
   Undo,
   Redo,
   Minus,
-  CornerUpRight
+  CornerUpRight,
+  Zap
 } from 'lucide-react';
 import { useAtlasStore } from '@/store/useAtlasStore';
 import type { SystemNode } from '@/lib/types';
@@ -45,6 +46,7 @@ const connectionTypes = [
   { id: 'straight', icon: Minus, label: 'Straight' },
   { id: 'step', icon: CornerUpRight, label: 'Right Angle' },
   { id: 'curved', icon: Link, label: 'Curved' },
+  { id: 'elbow', icon: Zap, label: 'Elbow' },
 ];
 
   const actions = [
@@ -102,6 +104,9 @@ export default function ToolShelf() {
       } else if (selectedConnectionType === 'step') {
         source = 'auth-service';
         target = 'user-db';
+      } else if (selectedConnectionType === 'elbow') {
+        source = 'hub';
+        target = 'auth-service';
       } else {
         source = 'hub';
         target = 'auth-service';
@@ -113,6 +118,12 @@ export default function ToolShelf() {
         target,
         kind: 'other' as const,
         connectionType: selectedConnectionType,
+        // Add default elbow points for testing
+        ...(selectedConnectionType === 'elbow' && {
+          elbowPoints: [
+            { x: 200, y: 150 }
+          ]
+        })
       };
       
       addEdge(newEdge);

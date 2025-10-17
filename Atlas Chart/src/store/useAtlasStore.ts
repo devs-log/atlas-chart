@@ -385,6 +385,8 @@ export const useAtlasStore = create<AtlasStore>()(
             edgeType = 'straightEdge';
           } else if (edge.connectionType === 'step') {
             edgeType = 'stepEdge';
+          } else if (edge.connectionType === 'elbow') {
+            edgeType = 'elbowEdge';
           }
           
           return {
@@ -500,13 +502,18 @@ export const useAtlasStore = create<AtlasStore>()(
       }),
       
       addElbowPoint: (edgeId, point) => set((state) => {
+        console.log('addElbowPoint called:', { edgeId, point });
         const index = state.edges.findIndex((e: any) => e.id === edgeId);
+        console.log('Found edge at index:', index);
         if (index !== -1) {
           if (!state.edges[index].elbowPoints) {
             state.edges[index].elbowPoints = [];
           }
           state.edges[index].elbowPoints!.push(point);
+          console.log('Added elbow point. New points:', state.edges[index].elbowPoints);
           state.hasUnsavedChanges = true;
+        } else {
+          console.warn('Edge not found:', edgeId);
         }
       }),
       

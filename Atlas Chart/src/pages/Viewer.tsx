@@ -9,6 +9,7 @@ import GraphView from '@/components/GraphView';
 import EdgeShape from '@/components/EdgeShape';
 import StraightEdge from '@/components/StraightEdge';
 import StepEdge from '@/components/StepEdge';
+import ElbowEdge from '@/components/ElbowEdge';
 import SceneToolbar from '@/components/SceneToolbar';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import DetailCard from '@/components/DetailCard';
@@ -24,6 +25,7 @@ const edgeTypes = {
   systemEdge: EdgeShape,
   straightEdge: StraightEdge,
   stepEdge: StepEdge,
+  elbowEdge: ElbowEdge,
 };
 
 export default function Viewer() {
