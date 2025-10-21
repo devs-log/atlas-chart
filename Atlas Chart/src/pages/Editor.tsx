@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { ReactFlow, Background, Controls, useReactFlow, ConnectionMode, ConnectionLineType } from 'reactflow';
+import { ReactFlow, Background, Controls, useReactFlow, ConnectionMode, ConnectionLineType, MarkerType } from 'reactflow';
 import 'reactflow/dist/style.css';
+import '../styles/arrow-animations.css';
 
 import { useAtlasStore } from '@/store/useAtlasStore';
 import { applySimpleSceneLayout } from '@/lib/simpleLayouts';
@@ -16,6 +17,7 @@ import FullscreenButton from '@/components/FullscreenButton';
 import MenuBar from '@/components/MenuBar';
 import ConnectionContextMenu from '@/components/ConnectionContextMenu';
 import ConnectionEditor from '@/components/ConnectionEditor';
+import ArrowGradients from '@/components/ArrowGradients';
 
 // Define node and edge types outside component to prevent recreation
 const nodeTypes = { 
@@ -342,6 +344,7 @@ export default function Editor() {
             className="bg-white/80 backdrop-blur-sm border border-[var(--line)] rounded-lg shadow-sm"
             position="bottom-left"
           />
+          <ArrowGradients />
         </ReactFlow>
       </div>
 

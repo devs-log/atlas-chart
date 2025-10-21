@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { MarkerType } from 'reactflow';
 import { useAtlasStore } from '@/store/useAtlasStore';
 import { 
   Type, 
@@ -29,6 +30,8 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState('');
   const [selectedOption, setSelectedOption] = useState<string>('');
+  const [arrowStyle, setArrowStyle] = useState<string>('none');
+  const [arrowLocation, setArrowLocation] = useState<string>('end');
   
   const {
     addConnectionLabel,
@@ -61,6 +64,19 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
         break;
       case 'routing':
         setSelectedOption(edgeData?.routing || 'direct');
+        break;
+      case 'arrow-markers':
+        // Initialize based on current edge marker state
+        if (edgeData?.markerEnd) {
+          setArrowStyle(edgeData.markerEnd.type === MarkerType.ArrowClosed ? 'solid' : 'hollow');
+          setArrowLocation('end');
+        } else if (edgeData?.markerStart) {
+          setArrowStyle(edgeData.markerStart.type === MarkerType.ArrowClosed ? 'solid' : 'hollow');
+          setArrowLocation('start');
+        } else {
+          setArrowStyle('none');
+          setArrowLocation('end');
+        }
         break;
     }
   }, [action, edgeData]);
@@ -115,6 +131,20 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
         break;
       case 'line-color':
         changeLineColor(edgeId, inputValue);
+        break;
+      case 'arrow-markers':
+        // Apply the selected arrow style and location to this specific edge
+        const marker = arrowStyle === 'none' 
+          ? undefined 
+          : { type: arrowStyle }; // 'solid' or 'hollow' - store will normalize to MarkerType
+
+        const start = arrowLocation === 'start' || arrowLocation === 'both' ? marker : undefined;
+        const end = arrowLocation === 'end' || arrowLocation === 'both' ? marker : undefined;
+
+        useAtlasStore.getState().updateEdge(edgeId, {
+          markerStart: start,
+          markerEnd: end,
+        });
         break;
     }
     onClose();
@@ -384,6 +414,82 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
           </div>
         );
 
+      case 'arrow-markers':
+        return (
+          <div className="space-y-6">
+            {/* Arrow Style */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Arrow Style
+              </label>
+              <div className="space-y-2">
+                {[
+                  { value: 'none', label: 'None', description: 'No arrow marker' },
+                  { value: 'hollow', label: 'Hollow', description: 'Clean thin outline arrow' },
+                  { value: 'solid', label: 'Solid', description: 'Bold filled arrow' },
+                  { value: 'accent', label: 'Accent', description: 'Primary blue arrow' },
+                  { value: 'success', label: 'Success', description: 'Green arrow for positive flows' },
+                  { value: 'danger', label: 'Danger', description: 'Red arrow for critical flows' },
+                  { value: 'warning', label: 'Warning', description: 'Amber arrow for caution' },
+                  { value: 'info', label: 'Info', description: 'Cyan arrow for information' },
+                  { value: 'gradient', label: 'Gradient', description: 'Animated gradient arrow' },
+                  { value: 'outline', label: 'Outline', description: 'Border with transparent fill' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setArrowStyle(option.value)}
+                    className={`w-full flex items-center justify-between p-3 rounded-md border transition-colors ${
+                      arrowStyle === option.value
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="text-left">
+                      <div className="font-medium">{option.label}</div>
+                      <div className="text-sm text-gray-500">{option.description}</div>
+                    </div>
+                    {arrowStyle === option.value && (
+                      <Check className="w-4 h-4 ml-auto" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Arrow Location */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Arrow Location
+              </label>
+              <div className="space-y-2">
+                {[
+                  { value: 'start', label: 'Start', description: 'Arrow at connection start' },
+                  { value: 'end', label: 'End', description: 'Arrow at connection end' },
+                  { value: 'both', label: 'Both', description: 'Arrows at both ends' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setArrowLocation(option.value)}
+                    className={`w-full flex items-center justify-between p-3 rounded-md border transition-colors ${
+                      arrowLocation === option.value
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="text-left">
+                      <div className="font-medium">{option.label}</div>
+                      <div className="text-sm text-gray-500">{option.description}</div>
+                    </div>
+                    {arrowLocation === option.value && (
+                      <Check className="w-4 h-4 ml-auto" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -399,6 +505,7 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
       case 'line-style': return 'Line Style';
       case 'line-weight': return 'Line Weight';
       case 'line-color': return 'Line Color';
+      case 'arrow-markers': return 'Arrow Markers';
       default: return 'Connection Options';
     }
   };

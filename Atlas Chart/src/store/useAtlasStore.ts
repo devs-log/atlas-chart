@@ -12,6 +12,7 @@ import type {
   Breadcrumb,
   ColorScheme
 } from '@/lib/types';
+import { getArrowStyles, type ArrowStyleKey } from '@/lib/markerStyles';
 
 interface AtlasStore extends AtlasState {
   // Actions
@@ -175,25 +176,23 @@ export const useAtlasStore = create<AtlasStore>()(
       updateEdge: (id, updates) => set((state) => {
         const index = state.edges.findIndex((e: any) => e.id === id);
         if (index !== -1) {
-          // Normalize markers to React Flow MarkerType at update time
+          // Get current color scheme for theme-aware markers
+          const isDark = state.colorScheme === 'dark';
+          const arrowStyles = getArrowStyles(isDark ? 'dark' : 'light');
+          
+          // Normalize markers using new style system
           const normalizedUpdates = { ...updates };
           
           if (updates.markerStart) {
-            normalizedUpdates.markerStart = {
-              type: updates.markerStart.type === 'solid' ? 'arrowclosed' : 'arrow',
-              color: updates.markerStart.color || '#000000',
-              width: updates.markerStart.width || 20,
-              height: updates.markerStart.height || 20,
-            };
+            const styleKey = updates.markerStart.type as ArrowStyleKey;
+            const style = arrowStyles[styleKey];
+            normalizedUpdates.markerStart = style || undefined;
           }
           
           if (updates.markerEnd) {
-            normalizedUpdates.markerEnd = {
-              type: updates.markerEnd.type === 'solid' ? 'arrowclosed' : 'arrow',
-              color: updates.markerEnd.color || '#000000',
-              width: updates.markerEnd.width || 20,
-              height: updates.markerEnd.height || 20,
-            };
+            const styleKey = updates.markerEnd.type as ArrowStyleKey;
+            const style = arrowStyles[styleKey];
+            normalizedUpdates.markerEnd = style || undefined;
           }
           
           Object.assign(state.edges[index], normalizedUpdates);

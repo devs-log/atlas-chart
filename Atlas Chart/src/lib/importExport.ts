@@ -74,10 +74,10 @@ export function loadExampleData(): { systems: System[]; edges: SystemEdge[] } {
         kind: 'sync',
         note: 'User data lookup',
         markerEnd: {
-          type: 'arrow',
-          width: 20,
-          height: 20,
-          color: '#000000'
+          type: 'arrowclosed',
+          width: 22,
+          height: 22,
+          color: '#2563eb'
         }
       }
     ]
