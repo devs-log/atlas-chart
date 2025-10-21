@@ -425,15 +425,8 @@ const ConnectionEditor: React.FC<ConnectionEditorProps> = ({
               <div className="space-y-2">
                 {[
                   { value: 'none', label: 'None', description: 'No arrow marker' },
-                  { value: 'hollow', label: 'Hollow', description: 'Clean thin outline arrow' },
-                  { value: 'solid', label: 'Solid', description: 'Bold filled arrow' },
-                  { value: 'accent', label: 'Accent', description: 'Primary blue arrow' },
-                  { value: 'success', label: 'Success', description: 'Green arrow for positive flows' },
-                  { value: 'danger', label: 'Danger', description: 'Red arrow for critical flows' },
-                  { value: 'warning', label: 'Warning', description: 'Amber arrow for caution' },
-                  { value: 'info', label: 'Info', description: 'Cyan arrow for information' },
-                  { value: 'gradient', label: 'Gradient', description: 'Animated gradient arrow' },
-                  { value: 'outline', label: 'Outline', description: 'Border with transparent fill' },
+                  { value: 'hollow', label: 'Hollow', description: 'Clean outline arrow' },
+                  { value: 'solid', label: 'Solid', description: 'Filled arrow' },
                 ].map((option) => (
                   <button
                     key={option.value}

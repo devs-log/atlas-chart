@@ -156,6 +156,13 @@ const ConnectionContextMenu: React.FC<ConnectionContextMenuProps> = ({
       shortcut: 'C',
       description: 'Customize connection color'
     },
+    { 
+      id: 'arrow-markers', 
+      icon: ArrowRight, 
+      label: 'Arrow Markers',
+      shortcut: 'A',
+      description: 'Add arrow markers to connection'
+    },
   ];
 
   return (
