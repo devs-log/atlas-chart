@@ -46,6 +46,7 @@ export default function Editor() {
     setSystems,
     setCamera,
     setSelectedNodeId,
+    setFocusNodeId,
     addSystem,
     addEdge,
     setSelectedTool,
@@ -155,6 +156,7 @@ export default function Editor() {
       return;
     }
     setSelectedNodeId(node.id);
+    setFocusNodeId(node.id); // Add this line to match Viewer behavior
     setSelectedEdgeId(undefined); // Clear edge selection when clicking a node
     hideRadialMenu(); // Close the context menu when clicking a node
   };
