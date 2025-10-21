@@ -1,5 +1,5 @@
 import React, { memo, useState, useCallback } from 'react';
-import { EdgeProps, EdgeLabelRenderer, Position, useReactFlow } from 'reactflow';
+import { EdgeProps, EdgeLabelRenderer, Position, useReactFlow, BaseEdge } from 'reactflow';
 import { ArrowRight, ArrowUp, ArrowDown, ArrowLeft } from 'lucide-react';
 import { useAtlasStore } from '@/store/useAtlasStore';
 
@@ -107,6 +107,8 @@ const ElbowEdgeComponent = memo(({
   style = {},
   data,
   selected,
+  markerStart,
+  markerEnd,
 }: EdgeProps<SystemEdge>) => {
   const selectedEdgeId = useAtlasStore((state) => state.selectedEdgeId);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
@@ -332,17 +334,18 @@ const ElbowEdgeComponent = memo(({
         />
       )}
       
-      {/* Visible edge path */}
-      <path
+      {/* Visible edge path with markers */}
+      <BaseEdge
         id={id}
+        path={edgePath}
+        markerStart={markerStart}
+        markerEnd={markerEnd}
         style={{
           ...edgeStyle,
           ...style,
           stroke: isSelected ? 'var(--primary)' : edgeStyle.stroke,
           strokeWidth: isSelected ? 3 : edgeStyle.strokeWidth,
         }}
-        className="react-flow__edge-path"
-        d={edgePath}
         data-kind={data?.kind || 'sync'}
         data-connection-type="elbow"
       />

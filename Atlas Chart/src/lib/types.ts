@@ -67,6 +67,20 @@ export interface SystemEdge {
   lineColor?: string;      // Custom line color
   elbowPoints?: Array<{ x: number; y: number }>; // Control points for elbow connections
   routing?: 'direct' | 'around'; // Routing preference
+  
+  // React Flow native marker properties (using EdgeMarker type)
+  markerEnd?: {
+    type: any; // Will be MarkerType.Arrow or MarkerType.ArrowClosed
+    color?: string;
+    width?: number;
+    height?: number;
+  };
+  markerStart?: {
+    type: any; // Will be MarkerType.Arrow or MarkerType.ArrowClosed
+    color?: string;
+    width?: number;
+    height?: number;
+  };
 }
 
 export interface CameraState {

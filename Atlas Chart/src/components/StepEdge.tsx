@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { EdgeProps, getSmoothStepPath, EdgeLabelRenderer, Position } from 'reactflow';
+import { EdgeProps, getSmoothStepPath, EdgeLabelRenderer, Position, BaseEdge } from 'reactflow';
 import { ArrowRight, ArrowUp, ArrowDown, ArrowLeft } from 'lucide-react';
 import { useAtlasStore } from '@/store/useAtlasStore';
 
@@ -25,6 +25,8 @@ const StepEdgeComponent = memo(({
   style = {},
   data,
   selected,
+  markerStart,
+  markerEnd,
 }: EdgeProps<SystemEdge>) => {
   const selectedEdgeId = useAtlasStore((state) => state.selectedEdgeId);
   
@@ -172,17 +174,18 @@ const StepEdgeComponent = memo(({
         />
       )}
       
-      {/* Visible edge path */}
-      <path
+      {/* Visible edge path with markers */}
+      <BaseEdge
         id={id}
+        path={edgePath}
+        markerStart={markerStart}
+        markerEnd={markerEnd}
         style={{
           ...edgeStyle,
           ...style,
           stroke: isSelected ? 'var(--primary)' : edgeStyle.stroke,
           strokeWidth: isSelected ? 3 : edgeStyle.strokeWidth,
         }}
-        className="react-flow__edge-path"
-        d={edgePath}
         data-kind={data?.kind || 'sync'}
         data-connection-type="step"
       />

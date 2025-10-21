@@ -1,3 +1,4 @@
+import { MarkerType } from 'reactflow';
 import { validateAtlasData, validateSystem, csvRowToSystem } from './validation';
 import type { System, SystemEdge, ImportResult, ExportOptions } from './types';
 
@@ -71,7 +72,13 @@ export function loadExampleData(): { systems: System[]; edges: SystemEdge[] } {
         source: 'auth-service',
         target: 'user-db',
         kind: 'sync',
-        note: 'User data lookup'
+        note: 'User data lookup',
+        markerEnd: {
+          type: 'arrow',
+          width: 20,
+          height: 20,
+          color: '#000000'
+        }
       }
     ]
   };

@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { EdgeProps, getBezierPath, EdgeLabelRenderer, Position } from 'reactflow';
+import { EdgeProps, getBezierPath, EdgeLabelRenderer, Position, MarkerType, BaseEdge } from 'reactflow';
 import { ArrowRight, ArrowUp, ArrowDown, ArrowLeft } from 'lucide-react';
 import { useAtlasStore } from '@/store/useAtlasStore';
 
@@ -14,6 +14,8 @@ const getPositionFromHandle = (handleId?: string): Position => {
   return Position.Top;
 };
 
+// React Flow handles markers automatically via markerEnd/markerStart props
+
 const EdgeComponent = memo(({
   id,
   sourceX,
@@ -25,6 +27,8 @@ const EdgeComponent = memo(({
   style = {},
   data,
   selected,
+  markerStart,
+  markerEnd,
 }: EdgeProps<SystemEdge>) => {
   const selectedEdgeId = useAtlasStore((state) => state.selectedEdgeId);
   
@@ -111,6 +115,8 @@ const EdgeComponent = memo(({
   const edgeStyle = getEdgeStyle(data?.kind || 'sync', data);
   const isSelected = selected || false;
   const isEdgeSelected = selectedEdgeId === id;
+  
+  // React Flow handles markers automatically via markerEnd/markerStart props
 
   return (
     <>
@@ -142,17 +148,18 @@ const EdgeComponent = memo(({
         />
       )}
       
-      {/* Visible edge path */}
-      <path
+      {/* Visible edge path with markers */}
+      <BaseEdge
         id={id}
+        path={edgePath}
+        markerStart={markerStart}
+        markerEnd={markerEnd}
         style={{
           ...edgeStyle,
           ...style,
           stroke: isSelected ? 'var(--primary)' : edgeStyle.stroke,
           strokeWidth: isSelected ? 2 : edgeStyle.strokeWidth,
         }}
-        className="react-flow__edge-path"
-        d={edgePath}
         data-kind={data?.kind || 'sync'}
       />
       

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { MarkerType } from 'reactflow';
 import type { 
   AtlasState, 
   System, 
@@ -174,7 +175,28 @@ export const useAtlasStore = create<AtlasStore>()(
       updateEdge: (id, updates) => set((state) => {
         const index = state.edges.findIndex((e: any) => e.id === id);
         if (index !== -1) {
-          Object.assign(state.edges[index], updates);
+          // Normalize markers to React Flow MarkerType at update time
+          const normalizedUpdates = { ...updates };
+          
+          if (updates.markerStart) {
+            normalizedUpdates.markerStart = {
+              type: updates.markerStart.type === 'solid' ? 'arrowclosed' : 'arrow',
+              color: updates.markerStart.color || '#000000',
+              width: updates.markerStart.width || 20,
+              height: updates.markerStart.height || 20,
+            };
+          }
+          
+          if (updates.markerEnd) {
+            normalizedUpdates.markerEnd = {
+              type: updates.markerEnd.type === 'solid' ? 'arrowclosed' : 'arrow',
+              color: updates.markerEnd.color || '#000000',
+              width: updates.markerEnd.width || 20,
+              height: updates.markerEnd.height || 20,
+            };
+          }
+          
+          Object.assign(state.edges[index], normalizedUpdates);
           state.hasUnsavedChanges = true;
         }
       }),
@@ -378,7 +400,7 @@ export const useAtlasStore = create<AtlasStore>()(
 
       getReactFlowEdges: () => {
         const { edges } = get();
-        return edges.map(edge => {
+        const reactFlowEdges = edges.map(edge => {
           // Determine edge type based on connectionType
           let edgeType = 'systemEdge'; // default to curved/bezier
           if (edge.connectionType === 'straight') {
@@ -389,7 +411,8 @@ export const useAtlasStore = create<AtlasStore>()(
             edgeType = 'elbowEdge';
           }
           
-          return {
+          
+          const edgeData: any = {
             id: edge.id,
             type: edgeType,
             source: edge.source,
@@ -399,7 +422,19 @@ export const useAtlasStore = create<AtlasStore>()(
             data: edge,
             animated: edge.animated,
           };
+
+          // Add markers if the edge has them defined - they're already normalized to MarkerType
+          if (edge.markerEnd) {
+            edgeData.markerEnd = edge.markerEnd;
+          }
+          if (edge.markerStart) {
+            edgeData.markerStart = edge.markerStart;
+          }
+
+          return edgeData;
         });
+        
+        return reactFlowEdges;
       },
 
       // URL sync
