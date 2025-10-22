@@ -151,14 +151,17 @@ export default function Editor() {
   }, []); // Removed fitView from dependency array
 
   const onNodeClick = (event: React.MouseEvent, node: any) => {
-    if (selectedTool === 'connect') {
-      // Handle connection logic
-      return;
-    }
+    // Always allow node selection for better UX (users can inspect nodes while connecting)
     setSelectedNodeId(node.id);
-    setFocusNodeId(node.id); // Add this line to match Viewer behavior
+    setFocusNodeId(node.id);
     setSelectedEdgeId(undefined); // Clear edge selection when clicking a node
     hideRadialMenu(); // Close the context menu when clicking a node
+    
+    // Handle connection logic if connector tool is selected
+    if (selectedTool === 'connect') {
+      // Connection logic will be handled by React Flow's onConnect event
+      // The node selection above provides visual feedback for the connection source
+    }
   };
 
   const onPaneClick = (event: React.MouseEvent) => {
