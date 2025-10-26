@@ -10,9 +10,14 @@ import type {
   Mode, 
   SceneType,
   Breadcrumb,
-  ColorScheme
+  ColorScheme,
+  ViewMode,
+  Initiative,
+  WorkItem,
+  WorkSummary
 } from '@/lib/types';
-import { getArrowStyles, type ArrowStyleKey } from '@/lib/markerStyles';
+import { getArrowStyles, type ArrowStyleKey } from '../lib/markerStyles';
+import { sampleWorkItems, sampleInitiatives } from '../lib/sampleData';
 
 interface AtlasStore extends AtlasState {
   // Actions
@@ -93,6 +98,27 @@ interface AtlasStore extends AtlasState {
   changeLineStyle: (edgeId: string, style: 'solid' | 'dashed' | 'dotted') => void;
   changeLineWeight: (edgeId: string, weight: 'thin' | 'normal' | 'bold') => void;
   changeLineColor: (edgeId: string, color: string) => void;
+  
+  // Phase 6 - Project Management actions
+  setViewMode: (mode: ViewMode) => void;
+  setInitiatives: (initiatives: Initiative[]) => void;
+  setWorkItems: (workItems: WorkItem[]) => void;
+  addInitiative: (initiative: Initiative) => void;
+  updateInitiative: (id: string, updates: Partial<Initiative>) => void;
+  removeInitiative: (id: string) => void;
+  addWorkItem: (workItem: WorkItem) => void;
+  updateWorkItem: (id: string, updates: Partial<WorkItem>) => void;
+  removeWorkItem: (id: string) => void;
+  selectInitiative: (id?: string) => void;
+  selectWorkItem: (id?: string) => void;
+  getInitiativeById: (id: string) => Initiative | undefined;
+  getWorkItemById: (id: string) => WorkItem | undefined;
+  calculateInitiativeProgress: (initiativeId: string) => number;
+  calculateSystemWorkSummary: (systemId: string) => WorkSummary;
+  
+  // Progress display settings
+  progressDisplayMode: 'hidden' | 'tasks' | 'features' | 'story-points';
+  setProgressDisplayMode: (mode: 'hidden' | 'tasks' | 'features' | 'story-points') => void;
 }
 
 const defaultCamera: CameraState = {
@@ -127,6 +153,15 @@ const defaultState: AtlasState = {
     edgeData: undefined,
   },
   selectedEdgeId: undefined,
+  // Phase 6 - Project Management fields
+  viewMode: 'architecture',
+  initiatives: sampleInitiatives,
+  workItems: sampleWorkItems,
+  selectedInitiativeId: undefined,
+  selectedWorkItemId: undefined,
+  
+  // Progress display settings
+  progressDisplayMode: 'tasks',
 };
 
 export const useAtlasStore = create<AtlasStore>()(
@@ -589,6 +624,122 @@ export const useAtlasStore = create<AtlasStore>()(
           state.edges[index].lineColor = color;
           state.hasUnsavedChanges = true;
         }
+      }),
+
+      // Phase 6 - Project Management actions
+      setViewMode: (mode) => set((state) => {
+        state.viewMode = mode;
+      }),
+
+      setInitiatives: (initiatives) => set((state) => {
+        state.initiatives = initiatives;
+        state.hasUnsavedChanges = true;
+      }),
+
+      setWorkItems: (workItems) => set((state) => {
+        state.workItems = workItems;
+        state.hasUnsavedChanges = true;
+      }),
+
+      addInitiative: (initiative) => set((state) => {
+        state.initiatives.push(initiative);
+        state.hasUnsavedChanges = true;
+      }),
+
+      updateInitiative: (id, updates) => set((state) => {
+        const index = state.initiatives.findIndex(i => i.id === id);
+        if (index !== -1) {
+          Object.assign(state.initiatives[index], updates);
+          state.hasUnsavedChanges = true;
+        }
+      }),
+
+      removeInitiative: (id) => set((state) => {
+        state.initiatives = state.initiatives.filter(i => i.id !== id);
+        state.hasUnsavedChanges = true;
+      }),
+
+      addWorkItem: (workItem) => set((state) => {
+        state.workItems.push(workItem);
+        state.hasUnsavedChanges = true;
+      }),
+
+      updateWorkItem: (id, updates) => set((state) => {
+        const index = state.workItems.findIndex(w => w.id === id);
+        if (index !== -1) {
+          Object.assign(state.workItems[index], updates);
+          state.hasUnsavedChanges = true;
+        }
+      }),
+
+      removeWorkItem: (id) => set((state) => {
+        state.workItems = state.workItems.filter(w => w.id !== id);
+        state.hasUnsavedChanges = true;
+      }),
+
+      selectInitiative: (id) => set((state) => {
+        state.selectedInitiativeId = id;
+      }),
+
+      selectWorkItem: (id) => set((state) => {
+        state.selectedWorkItemId = id;
+      }),
+
+      getInitiativeById: (id) => {
+        const state = get();
+        return state.initiatives.find(i => i.id === id);
+      },
+
+      getWorkItemById: (id) => {
+        const state = get();
+        return state.workItems.find(w => w.id === id);
+      },
+
+      calculateInitiativeProgress: (initiativeId) => {
+        const state = get();
+        const initiative = state.initiatives.find(i => i.id === initiativeId);
+        if (!initiative) return 0;
+
+        const initiativeWorkItems = state.workItems.filter(w => 
+          initiative.systems.includes(w.systemId)
+        );
+
+        if (initiativeWorkItems.length === 0) return 0;
+
+        const completedItems = initiativeWorkItems.filter(w => w.status === 'done').length;
+        return Math.round((completedItems / initiativeWorkItems.length) * 100);
+      },
+
+      calculateSystemWorkSummary: (systemId) => {
+        const state = get();
+        const systemWorkItems = state.workItems.filter(w => w.systemId === systemId);
+        
+        const total = systemWorkItems.length;
+        const done = systemWorkItems.filter(w => w.status === 'done').length;
+        const inProgress = systemWorkItems.filter(w => w.status === 'in progress').length;
+        const blocked = systemWorkItems.filter(w => w.status === 'blocked').length;
+        const overdue = systemWorkItems.filter(w => {
+          if (!w.dueDate) return false;
+          const dueDate = new Date(w.dueDate);
+          const today = new Date();
+          return dueDate < today && w.status !== 'done';
+        }).length;
+
+        return {
+          total,
+          done,
+          inProgress,
+          blocked,
+          overdue,
+          completionRate: total > 0 ? Math.round((done / total) * 100) : 0,
+          blockedRate: total > 0 ? Math.round((blocked / total) * 100) : 0,
+          overdueRate: total > 0 ? Math.round((overdue / total) * 100) : 0
+        };
+      },
+
+      setProgressDisplayMode: (mode) => set((state) => {
+        state.progressDisplayMode = mode;
+        state.hasUnsavedChanges = true;
       }),
     }))
   )

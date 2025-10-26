@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
-import { useAtlasStore } from '@/store/useAtlasStore';
+import { useAtlasStore } from '../store/useAtlasStore';
 import { 
   Database, 
   Server, 
@@ -13,7 +13,8 @@ import {
   Play
 } from 'lucide-react';
 
-import type { SystemNode } from '@/lib/types';
+import type { SystemNode } from '../lib/types';
+import ProgressBar from './ProgressBar';
 // Simple opacity and scale helpers - MAKE ALL NODES FULLY VISIBLE
 function getNodeOpacity(distance: number): number {
   // Always return 1.0 for full visibility
@@ -104,6 +105,16 @@ const SystemNodeComponent = memo(({ data, selected }: NodeProps<SystemNode>) => 
             style={{ color: statusColor }}
           />
         </div>
+
+        {/* Progress Bar */}
+        <ProgressBar 
+          systemId={data.id} 
+          onClick={() => {
+            // Switch to work mode and filter by this system
+            useAtlasStore.getState().setViewMode('work');
+            // TODO: Add system filter to work view
+          }}
+        />
 
         {/* Type and Domain */}
         <div className="text-xs mb-2" style={{ color: '#333333' }}>
