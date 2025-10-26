@@ -58,6 +58,7 @@ export default function Editor() {
     showRadialMenu,
     hideRadialMenu,
     setSelectedEdgeId,
+    updateEdge,
   } = useAtlasStore();
 
   // State for connection editor
@@ -250,6 +251,54 @@ export default function Editor() {
     }
   };
 
+  const onEdgeDoubleClick = (event: React.MouseEvent, edge: any) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    console.log('🎯 DOUBLE CLICK DETECTED!', edge.id, edge.type);
+    
+    // Handle all edge types
+    const currentEdge = edges.find(e => e.id === edge.id);
+    if (!currentEdge) return;
+    
+    // Convert screen coordinates to flow coordinates using camera state
+    const reactFlowWrapper = document.querySelector('.react-flow');
+    if (!reactFlowWrapper) return;
+    
+    const rect = reactFlowWrapper.getBoundingClientRect();
+    const screenX = event.clientX - rect.left;
+    const screenY = event.clientY - rect.top;
+    
+    // Convert to flow coordinates using camera position and zoom
+    const flowX = (screenX - camera.x) / camera.zoom;
+    const flowY = (screenY - camera.y) / camera.zoom;
+    
+    console.log('Screen coords:', { screenX, screenY });
+    console.log('Flow coords:', { flowX, flowY });
+    console.log('Camera:', camera);
+    
+    // First, convert the connection to elbow type if it isn't already
+    if (currentEdge.connectionType !== 'elbow') {
+      console.log('Converting connection to elbow type');
+      updateEdge(edge.id, {
+        connectionType: 'elbow',
+        elbowPoints: []
+      });
+    }
+    
+    // Add new elbow point
+    const currentPoints = currentEdge.elbowPoints || [];
+    const newPoints = [...currentPoints, { x: flowX, y: flowY }];
+    
+    console.log('Adding elbow point at:', { x: flowX, y: flowY });
+    console.log('New elbow points:', newPoints);
+    
+    // Update the edge
+    updateEdge(edge.id, {
+      elbowPoints: newPoints
+    });
+  };
+
   const onConnect = (params: any) => {
     console.log('🔗 onConnect fired', params);
 
@@ -313,6 +362,7 @@ export default function Editor() {
           onPaneClick={onPaneClick}
           onConnect={onConnect}
           onEdgeClick={onEdgeClick}
+          onEdgeDoubleClick={onEdgeDoubleClick}
           onConnectStart={(e, params) => {
             console.log('🟡 onConnectStart', params);
             setConnecting(true);

@@ -1,9 +1,9 @@
 import React, { memo, useState, useCallback } from 'react';
 import { EdgeProps, EdgeLabelRenderer, Position, useReactFlow, BaseEdge } from 'reactflow';
 import { ArrowRight, ArrowUp, ArrowDown, ArrowLeft } from 'lucide-react';
-import { useAtlasStore } from '@/store/useAtlasStore';
+import { useAtlasStore } from '../store/useAtlasStore';
 
-import type { SystemEdge } from '@/lib/types';
+import type { SystemEdge } from '../lib/types';
 
 const getPositionFromHandle = (handleId?: string): Position => {
   if (!handleId) return Position.Top;
@@ -144,15 +144,7 @@ const ElbowEdgeComponent = memo(({
     elbowPoints
   );
   
-  console.log('ElbowEdge path generation:', {
-    id,
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-    elbowPoints,
-    path: edgePath
-  });
+  
 
   // Determine edge style based on kind and custom properties
   const getEdgeStyle = (kind: SystemEdge['kind'], customStyle?: Partial<SystemEdge>) => {
@@ -259,6 +251,24 @@ const ElbowEdgeComponent = memo(({
     document.addEventListener('mouseup', handleMouseUp);
   }, [id, data?.elbowPoints]);
 
+  // Handle removing elbow points on right-click
+  const handlePointRightClick = useCallback((event: React.MouseEvent, pointIndex: number) => {
+    event.stopPropagation();
+    event.preventDefault();
+    
+    const currentPoints = data?.elbowPoints || [];
+    const newPoints = currentPoints.filter((_, index) => index !== pointIndex);
+    
+    useAtlasStore.getState().updateEdge(id, {
+      elbowPoints: newPoints
+    });
+  }, [id, data?.elbowPoints]);
+
+  // Handle single click for debugging
+  const handleEdgeClick = useCallback((event: React.MouseEvent) => {
+    console.log('ElbowEdge single click detected on edge:', id);
+  }, [id]);
+
   // Handle adding new elbow points on double-click
   const handleEdgeDoubleClick = useCallback((event: React.MouseEvent) => {
     event.stopPropagation();
@@ -283,24 +293,6 @@ const ElbowEdgeComponent = memo(({
       elbowPoints: newPoints
     });
   }, [id, data?.elbowPoints, screenToFlowPosition]);
-
-  // Handle removing elbow points on right-click
-  const handlePointRightClick = useCallback((event: React.MouseEvent, pointIndex: number) => {
-    event.stopPropagation();
-    event.preventDefault();
-    
-    const currentPoints = data?.elbowPoints || [];
-    const newPoints = currentPoints.filter((_, index) => index !== pointIndex);
-    
-    useAtlasStore.getState().updateEdge(id, {
-      elbowPoints: newPoints
-    });
-  }, [id, data?.elbowPoints]);
-
-  // Handle single click for debugging
-  const handleEdgeClick = useCallback((event: React.MouseEvent) => {
-    console.log('ElbowEdge single click detected on edge:', id);
-  }, [id]);
 
   return (
     <>
@@ -370,6 +362,7 @@ const ElbowEdgeComponent = memo(({
               cy={point.y}
               r={20}
               fill="transparent"
+              data-testid="elbow-point"
               data-elbow-point="true"
               data-point-index={index}
               style={{ cursor: draggingPoint === index ? 'grabbing' : 'grab' }}
@@ -390,6 +383,7 @@ const ElbowEdgeComponent = memo(({
               stroke={draggingPoint === index ? '#3b82f6' : hoveredPoint === index ? '#60a5fa' : 'var(--primary)'}
               strokeWidth={draggingPoint === index ? 3 : hoveredPoint === index ? 2.5 : 2}
               opacity={draggingPoint === index ? 0.8 : hoveredPoint === index ? 0.6 : 0.4}
+              data-testid="elbow-point"
               data-elbow-point="true"
               data-point-index={index}
               style={{ 
@@ -412,6 +406,7 @@ const ElbowEdgeComponent = memo(({
               fill={draggingPoint === index ? '#3b82f6' : hoveredPoint === index ? '#60a5fa' : 'var(--primary)'}
               stroke="white"
               strokeWidth={draggingPoint === index ? 4 : 3}
+              data-testid="elbow-point"
               data-elbow-point="true"
               data-point-index={index}
               style={{ 

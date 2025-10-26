@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EdgeProps, getBezierPath, EdgeLabelRenderer, Position, MarkerType, BaseEdge } from 'reactflow';
 import { ArrowRight, ArrowUp, ArrowDown, ArrowLeft } from 'lucide-react';
 import { useAtlasStore } from '@/store/useAtlasStore';
@@ -115,6 +115,61 @@ const EdgeComponent = memo(({
   const edgeStyle = getEdgeStyle(data?.kind || 'sync', data);
   const isSelected = selected || false;
   const isEdgeSelected = selectedEdgeId === id;
+
+  // Manual coordinate conversion function for double-click
+  const screenToFlowPosition = (screenPosition: { x: number; y: number }) => {
+    // Get the React Flow viewport from the store
+    const camera = useAtlasStore.getState().camera;
+    const zoom = camera.zoom;
+    
+    // Convert screen coordinates to flow coordinates
+    const flowX = (screenPosition.x - camera.x) / zoom;
+    const flowY = (screenPosition.y - camera.y) / zoom;
+    
+    return { x: flowX, y: flowY };
+  };
+
+  // Handle adding elbow points on double-click (convert to elbow type)
+  const handleEdgeDoubleClick = useCallback((event: React.MouseEvent) => {
+    event.stopPropagation();
+    event.preventDefault();
+    console.log('🎯 EdgeShape double-click detected on edge:', id);
+    console.log('Event details:', { clientX: event.clientX, clientY: event.clientY });
+    
+    // Convert screen coordinates to flow coordinates
+    const position = screenToFlowPosition({
+      x: event.clientX,
+      y: event.clientY,
+    });
+    
+    console.log('Adding elbow point at position:', position);
+    
+    // First, convert the connection to elbow type if it isn't already
+    const currentEdge = useAtlasStore.getState().edges.find(e => e.id === id);
+    console.log('Current edge:', currentEdge);
+    if (currentEdge && currentEdge.connectionType !== 'elbow') {
+      console.log('Converting connection to elbow type');
+      useAtlasStore.getState().updateEdge(id, {
+        connectionType: 'elbow',
+        elbowPoints: []
+      });
+    }
+    
+    // Add new elbow point at the exact click position
+    const currentPoints = data?.elbowPoints || [];
+    const newPoints = [...currentPoints, { x: position.x, y: position.y }];
+    
+    console.log('New elbow points:', newPoints);
+    
+    useAtlasStore.getState().updateEdge(id, {
+      elbowPoints: newPoints
+    });
+  }, [id, data?.elbowPoints, screenToFlowPosition]);
+
+  // Handle single click for debugging
+  const handleEdgeClick = useCallback((event: React.MouseEvent) => {
+    console.log('🔍 EdgeShape single click detected on edge:', id);
+  }, [id]);
   
   // React Flow handles markers automatically via markerEnd/markerStart props
 
@@ -131,6 +186,8 @@ const EdgeComponent = memo(({
         }}
         d={edgePath}
         className="react-flow__edge-path"
+        onClick={handleEdgeClick}
+        onDoubleClick={handleEdgeDoubleClick}
       />
       
       {/* Selection effect - subtle highlight */}
