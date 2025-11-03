@@ -1,5 +1,6 @@
 {
   "framework": "other",
+  "rootDirectory": ".",
   "installCommand": "npm install",
   "buildCommand": "npm run build",
   "outputDirectory": "dist"
