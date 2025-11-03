@@ -111,8 +111,9 @@ const SystemNodeComponent = memo(({ data, selected }: NodeProps<SystemNode>) => 
           systemId={data.id} 
           onClick={() => {
             // Switch to work mode and filter by this system
-            useAtlasStore.getState().setViewMode('work');
-            // TODO: Add system filter to work view
+            const store = useAtlasStore.getState();
+            store.setSelectedSystemIdForWorkView(data.id);
+            store.setViewMode('work');
           }}
         />
 

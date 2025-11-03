@@ -134,7 +134,7 @@ export default function ToolShelf() {
   };
 
   return (
-    <div className="panel-glass w-16 h-full flex flex-col pointer-events-auto">
+    <div className="panel-glass w-16 h-full flex flex-col pointer-events-auto" data-testid="tool-shelf">
       {/* Node Types */}
       <div className="p-2 border-b border-[var(--line)]/50">
         <div className="text-xs text-muted mb-2 text-center">Nodes</div>
@@ -146,6 +146,7 @@ export default function ToolShelf() {
             return (
               <button
                 key={nodeType.id}
+                data-testid={`node-type-${nodeType.id}`}
                 onClick={() => handleNodeTypeSelect(nodeType.id)}
                 className={`
                   w-full p-2 rounded-lg transition-all duration-200 group relative
@@ -197,6 +198,7 @@ export default function ToolShelf() {
             return (
               <button
                 key={connectionType.id}
+                data-testid={`connection-type-${connectionType.id}`}
                 onClick={() => handleConnectionTypeSelect(connectionType.id)}
                 className={`
                   w-full p-2 rounded-lg transition-all duration-200
@@ -225,11 +227,12 @@ export default function ToolShelf() {
             return (
               <button
                 key={tool.id}
+                data-testid={`${tool.id}-tool`}
                 onClick={() => handleToolSelect(tool.id)}
                 className={`
                   w-full p-2 rounded-lg transition-all duration-200
-                  ${isSelected 
-                    ? 'bg-primary text-white' 
+                  ${isSelected
+                    ? 'bg-primary text-white'
                     : 'text-muted hover:text-primary hover:bg-white/50'
                   }
                 `}

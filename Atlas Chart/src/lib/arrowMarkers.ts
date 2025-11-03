@@ -49,9 +49,9 @@ export const generateArrowMarkers = (edges: SystemEdge[]): string => {
 
 // Get arrow configuration from edge
 export const getArrowConfig = (edge: SystemEdge): ArrowConfig => ({
-  style: edge.arrowStyle || 'solid',
-  direction: edge.arrowDirection || 'target',
-  size: edge.arrowSize || 'medium',
+  style: 'solid', // Default style since arrowStyle doesn't exist on SystemEdge
+  direction: 'target', // Default direction since arrowDirection doesn't exist on SystemEdge
+  size: 'medium', // Default size since arrowSize doesn't exist on SystemEdge
   color: edge.lineColor || '#3b82f6'
 });
 

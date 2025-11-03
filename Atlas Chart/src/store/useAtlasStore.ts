@@ -116,6 +116,12 @@ interface AtlasStore extends AtlasState {
   calculateInitiativeProgress: (initiativeId: string) => number;
   calculateSystemWorkSummary: (systemId: string) => WorkSummary;
   
+  // WorkView state
+  selectedSystemIdForWorkView?: string;
+  workViewSearchQuery: string;
+  setSelectedSystemIdForWorkView: (systemId?: string) => void;
+  setWorkViewSearchQuery: (query: string) => void;
+  
   // Progress display settings
   progressDisplayMode: 'hidden' | 'tasks' | 'features' | 'story-points';
   setProgressDisplayMode: (mode: 'hidden' | 'tasks' | 'features' | 'story-points') => void;
@@ -159,6 +165,8 @@ const defaultState: AtlasState = {
   workItems: sampleWorkItems,
   selectedInitiativeId: undefined,
   selectedWorkItemId: undefined,
+  selectedSystemIdForWorkView: undefined,
+  workViewSearchQuery: '',
   
   // Progress display settings
   progressDisplayMode: 'tasks',
@@ -740,6 +748,15 @@ export const useAtlasStore = create<AtlasStore>()(
       setProgressDisplayMode: (mode) => set((state) => {
         state.progressDisplayMode = mode;
         state.hasUnsavedChanges = true;
+      }),
+
+      // WorkView actions
+      setSelectedSystemIdForWorkView: (systemId) => set((state) => {
+        state.selectedSystemIdForWorkView = systemId;
+      }),
+
+      setWorkViewSearchQuery: (query) => set((state) => {
+        state.workViewSearchQuery = query;
       }),
     }))
   )

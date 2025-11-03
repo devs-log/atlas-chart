@@ -3,11 +3,13 @@ import { ReactFlowProvider } from 'reactflow';
 import { useAtlasStore } from '@/store/useAtlasStore';
 import Viewer from '@/pages/Viewer';
 import Editor from '@/pages/Editor';
+import WorkView from '@/pages/WorkView';
 import SettingsPanel from '@/components/SettingsPanel';
 import { loadExampleData } from '@/lib/importExport';
 
 function App() {
   const mode = useAtlasStore((state) => state.mode);
+  const viewMode = useAtlasStore((state) => state.viewMode);
   const systems = useAtlasStore((state) => state.systems);
   const edges = useAtlasStore((state) => state.edges);
   const setSystems = useAtlasStore((state) => state.setSystems);
@@ -76,16 +78,33 @@ function App() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  return (
+  const renderMainView = () => {
+    if (viewMode === 'work') {
+      return <WorkView />;
+    }
+    return mode === 'viewing' ? <Viewer /> : <Editor />;
+  };
+
+  // Only wrap ReactFlowProvider around views that actually use React Flow
+  // WorkView doesn't need it and it interferes with @dnd-kit event handling
+  const needsReactFlow = viewMode === 'architecture' || viewMode === 'project';
+
+  const content = (
+    <div className={`app-shell w-full h-full ${viewMode === 'kanban' ? '' : 'overflow-hidden'}`}>
+      {renderMainView()}
+      <SettingsPanel 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)} 
+      />
+    </div>
+  );
+
+  return needsReactFlow ? (
     <ReactFlowProvider>
-      <div className="app-shell w-full h-full overflow-hidden">
-        {mode === 'viewing' ? <Viewer /> : <Editor />}
-        <SettingsPanel 
-          isOpen={showSettings} 
-          onClose={() => setShowSettings(false)} 
-        />
-      </div>
+      {content}
     </ReactFlowProvider>
+  ) : (
+    content
   );
 }
 
