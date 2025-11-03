@@ -1,6 +1,4 @@
 {
-  "outputDirectory": "dist",
-  "installCommand": "npm install",
   "rewrites": [
     {
       "source": "/(.*)",
