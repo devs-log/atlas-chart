@@ -18,7 +18,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['elkjs'],
-    include: ['react', 'react-dom'],
+    include: ['react', 'react-dom', '@dnd-kit/core', '@dnd-kit/utilities'],
   },
   define: {
     global: 'globalThis',
