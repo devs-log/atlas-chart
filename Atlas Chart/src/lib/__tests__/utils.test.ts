@@ -7,7 +7,11 @@ import type {
   Milestone,
   ExternalRef,
   EffortEstimation,
-  WorkSummary
+  WorkSummary,
+  WorkItemStatus,
+  WorkItemType,
+  Priority,
+  InitiativeStatus
 } from '../../lib/types';
 
 // ============================================================================

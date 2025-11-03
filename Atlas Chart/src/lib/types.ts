@@ -152,6 +152,8 @@ export interface AtlasState {
   workItems: WorkItem[];                 // All work items
   selectedInitiativeId?: string;         // Currently selected initiative
   selectedWorkItemId?: string;           // Currently selected work item
+  selectedSystemIdForWorkView?: string;  // System selected in work view
+  workViewSearchQuery: string;           // Search query in work view
   
   // Progress display settings
   progressDisplayMode: 'hidden' | 'tasks' | 'features' | 'story-points';

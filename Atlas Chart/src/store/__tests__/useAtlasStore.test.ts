@@ -10,7 +10,7 @@ import type {
   WorkItemStatus,
   Priority,
   WorkItemType
-} from '../types';
+} from '../../lib/types';
 
 // ============================================================================
 // STORE FUNCTIONALITY TESTS

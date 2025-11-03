@@ -13,7 +13,7 @@ import type {
   ExternalRef,
   EffortEstimation,
   WorkSummary
-} from '../types';
+} from '../lib/types';
 
 // ============================================================================
 // TEST DATA FACTORIES (Factory Pattern)

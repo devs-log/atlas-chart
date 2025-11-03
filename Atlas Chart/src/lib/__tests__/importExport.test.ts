@@ -5,7 +5,10 @@ import type {
   Initiative, 
   WorkItem,
   ImportResult,
-  ExportOptions
+  ExportOptions,
+  WorkItemStatus,
+  WorkItemType,
+  Priority
 } from '../types';
 
 // ============================================================================
@@ -401,10 +404,11 @@ workitem-2,"Fix Login Bug","Fix login validation issue",system-1,"Bob Smith",don
 
       const result = importWorkItemsFromCSV(csvContent);
       expect(result.success).toBe(true);
-      expect(result.workItems).toHaveLength(2);
-      expect(result.workItems[0].title).toBe('Implement OAuth 2.0');
-      expect(result.workItems[1].title).toBe('Fix Login Bug');
-      expect(result.workItems[0].tags).toEqual(['authentication', 'oauth']);
+      expect(result.workItems).toBeDefined();
+      expect(result.workItems!).toHaveLength(2);
+      expect(result.workItems![0].title).toBe('Implement OAuth 2.0');
+      expect(result.workItems![1].title).toBe('Fix Login Bug');
+      expect(result.workItems![0].tags).toEqual(['authentication', 'oauth']);
     });
 
     it('handles CSV import errors gracefully', () => {

@@ -7,7 +7,8 @@ import type {
   SystemEdge, 
   Initiative, 
   WorkItem,
-  ViewMode
+  ViewMode,
+  WorkItemStatus
 } from '../../lib/types';
 
 // ============================================================================
@@ -241,7 +242,7 @@ describe('Atlas Store - Enhanced Testing Patterns', () => {
       useAtlasStore.getState().addWorkItem(workItem);
 
       // ACT & ASSERT - Test state machine transitions
-      const validTransitions = [
+      const validTransitions: Array<{ from: WorkItemStatus; to: WorkItemStatus }> = [
         { from: 'todo', to: 'in progress' },
         { from: 'in progress', to: 'review' },
         { from: 'review', to: 'done' },

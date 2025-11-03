@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { useAtlasStore } from '../../store/useAtlasStore';
 import type { 
   System, 
   SystemEdge, 
@@ -443,16 +444,16 @@ describe('Data Integrity Testing - ACID Compliance', () => {
 
   it('should maintain consistency', () => {
     // Test referential integrity
-    const system = { id: 'consistency-test', name: 'Consistency Test', type: 'service', domain: 'D', status: 'live' };
-    const edge = { id: 'consistency-edge', source: 'consistency-test', target: 'consistency-test', kind: 'sync' };
+    const system: System = { id: 'consistency-test', name: 'Consistency Test', type: 'service', domain: 'D', status: 'live' };
+    const edge: SystemEdge = { id: 'consistency-edge', source: 'consistency-test', target: 'consistency-test', kind: 'sync' };
     
     useAtlasStore.getState().addSystem(system);
     useAtlasStore.getState().addEdge(edge);
     
     // Verify consistency
     const state = useAtlasStore.getState();
-    const systemExists = state.systems.some(s => s.id === 'consistency-test');
-    const edgeExists = state.edges.some(e => e.id === 'consistency-edge');
+    const systemExists = state.systems.some((s: System) => s.id === 'consistency-test');
+    const edgeExists = state.edges.some((e: SystemEdge) => e.id === 'consistency-edge');
     
     expect(systemExists).toBe(true);
     expect(edgeExists).toBe(true);
@@ -473,19 +474,19 @@ describe('Data Integrity Testing - ACID Compliance', () => {
     expect(() => operation2()).not.toThrow();
     
     const state = useAtlasStore.getState();
-    expect(state.systems.some(s => s.id === 'isolation-1')).toBe(true);
-    expect(state.systems.some(s => s.id === 'isolation-2')).toBe(true);
+    expect(state.systems.some((s: System) => s.id === 'isolation-1')).toBe(true);
+    expect(state.systems.some((s: System) => s.id === 'isolation-2')).toBe(true);
   });
 
   it('should maintain durability', () => {
     // Test that data persists across operations
-    const system = { id: 'durability-test', name: 'Durability Test', type: 'service', domain: 'D', status: 'live' };
+    const system: System = { id: 'durability-test', name: 'Durability Test', type: 'service', domain: 'D', status: 'live' };
     
     useAtlasStore.getState().addSystem(system);
     
     // Simulate store reset and reload
     const state = useAtlasStore.getState();
-    expect(state.systems.some(s => s.id === 'durability-test')).toBe(true);
+    expect(state.systems.some((s: System) => s.id === 'durability-test')).toBe(true);
   });
 });
 
